@@ -11,10 +11,78 @@ import {
     BellOutlined,
     DownOutlined,
     FileTextOutlined,
+    ShoppingOutlined,
+    TagOutlined,
+    GiftOutlined,
+    ShopOutlined,
+    RocketOutlined,
+    FundProjectionScreenOutlined,
+    MailOutlined,
+    NotificationOutlined,
+    DollarOutlined,
+    WalletOutlined,
+    BankOutlined,
+    AuditOutlined,
+    CustomerServiceOutlined,
+    QuestionCircleOutlined,
+    BugOutlined,
+    PhoneOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const { Header, Sider, Content } = Layout;
+
+/* Icon hover animation styles */
+const sidebarAnimationStyles = `
+@keyframes iconBounce {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.35) rotate(-8deg); }
+    50%  { transform: scale(0.95) rotate(4deg); }
+    70%  { transform: scale(1.15) rotate(-2deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes iconPulse {
+    0%   { transform: scale(1); opacity: 1; }
+    50%  { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.sidebar-animated-menu .ant-menu-item:hover .anticon,
+.sidebar-animated-menu .ant-menu-submenu-title:hover .anticon {
+    animation: iconBounce 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    color: #69c0ff !important;
+    transition: color 0.3s ease;
+}
+
+.sidebar-animated-menu .ant-menu-item .anticon,
+.sidebar-animated-menu .ant-menu-submenu-title .anticon {
+    transition: color 0.3s ease, transform 0.3s ease;
+    font-size: 16px;
+}
+
+.sidebar-animated-menu .ant-menu-item:hover,
+.sidebar-animated-menu .ant-menu-submenu-title:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.sidebar-animated-menu .ant-menu-sub {
+    background: #1a3e5c !important;
+}
+
+.sidebar-animated-menu .ant-menu-sub .ant-menu-item {
+    padding-left: 48px !important;
+}
+
+.sidebar-animated-menu .ant-menu-submenu-arrow {
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.sidebar-animated-menu .ant-menu-submenu-open > .ant-menu-submenu-title .anticon {
+    animation: iconPulse 0.4s ease forwards;
+    color: #69c0ff !important;
+}
+`;
 
 const MainLayout = ({ children }) => {
     const [collapsed, setCollapsed] = useState(false);
@@ -50,6 +118,98 @@ const MainLayout = ({ children }) => {
             icon: <SettingOutlined />,
             label: 'Settings',
         },
+        {
+            type: 'divider',
+            style: { borderColor: 'rgba(255,255,255,0.1)', margin: '12px 16px' },
+        },
+        {
+            key: 'products-sub',
+            icon: <ShoppingOutlined />,
+            label: 'Ürünler',
+            children: [
+                {
+                    key: '/products/catalog',
+                    icon: <ShopOutlined />,
+                    label: 'Katalog',
+                },
+                {
+                    key: '/products/categories',
+                    icon: <TagOutlined />,
+                    label: 'Kategoriler',
+                },
+                {
+                    key: '/products/inventory',
+                    icon: <GiftOutlined />,
+                    label: 'Stok Yönetimi',
+                },
+            ],
+        },
+        {
+            key: 'marketing-sub',
+            icon: <RocketOutlined />,
+            label: 'Pazarlama',
+            children: [
+                {
+                    key: '/marketing/campaigns',
+                    icon: <FundProjectionScreenOutlined />,
+                    label: 'Kampanyalar',
+                },
+                {
+                    key: '/marketing/email',
+                    icon: <MailOutlined />,
+                    label: 'E-Posta',
+                },
+                {
+                    key: '/marketing/notifications',
+                    icon: <NotificationOutlined />,
+                    label: 'Bildirimler',
+                },
+            ],
+        },
+        {
+            key: 'finance-sub',
+            icon: <DollarOutlined />,
+            label: 'Finans',
+            children: [
+                {
+                    key: '/finance/payments',
+                    icon: <WalletOutlined />,
+                    label: 'Ödemeler',
+                },
+                {
+                    key: '/finance/accounting',
+                    icon: <BankOutlined />,
+                    label: 'Muhasebe',
+                },
+                {
+                    key: '/finance/invoices',
+                    icon: <AuditOutlined />,
+                    label: 'Faturalar',
+                },
+            ],
+        },
+        {
+            key: 'support-sub',
+            icon: <CustomerServiceOutlined />,
+            label: 'Destek',
+            children: [
+                {
+                    key: '/support/tickets',
+                    icon: <QuestionCircleOutlined />,
+                    label: 'Talepler',
+                },
+                {
+                    key: '/support/bugs',
+                    icon: <BugOutlined />,
+                    label: 'Hata Bildirimi',
+                },
+                {
+                    key: '/support/contact',
+                    icon: <PhoneOutlined />,
+                    label: 'İletişim',
+                },
+            ],
+        },
     ];
 
     const userMenu = {
@@ -68,6 +228,7 @@ const MainLayout = ({ children }) => {
 
     return (
         <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
+            <style>{sidebarAnimationStyles}</style>
             <Sider
                 trigger={null}
                 collapsible
@@ -109,11 +270,16 @@ const MainLayout = ({ children }) => {
                     {!collapsed && <span style={{ fontWeight: 600, fontSize: 16, color: 'white' }}>Dashboard</span>}
                 </div>
                 <Menu
+                    className="sidebar-animated-menu"
                     theme="dark"
                     mode="inline"
                     selectedKeys={[location.pathname]}
                     items={menuItems}
-                    onClick={({ key }) => navigate(key)}
+                    onClick={({ key }) => {
+                        if (!key.endsWith('-sub')) {
+                            navigate(key);
+                        }
+                    }}
                     style={{
                         background: '#214F73',
                         borderRight: 0,
