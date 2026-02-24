@@ -1,0 +1,259 @@
+/* ShipmentStatusBarV2.css */
+
+.ssb2-wrap {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-sizing: border-box;
+}
+
+/* ── Title bar ── */
+.ssb2-title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+.ssb2-title-left {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.ssb2-title-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+
+.ssb2-title-meta {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 500;
+}
+
+.ssb2-collapse-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    color: #fff;
+    font-size: 13px;
+    transition: background 0.15s;
+    outline: none;
+    flex-shrink: 0;
+}
+
+.ssb2-collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.ssb2-collapse-chevron {
+    display: inline-block;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1;
+}
+
+.ssb2-collapse-chevron.collapsed {
+    transform: rotate(-90deg);
+}
+
+/* ── Collapsible body ── */
+.ssb2-body {
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Stacked proportional bar ── */
+.ssb2-stack-bar {
+    display: flex;
+    height: 8px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.ssb2-stack-seg {
+    height: 100%;
+    transition: flex 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+}
+
+.ssb2-stack-seg:hover {
+    filter: brightness(1.12);
+}
+
+/* ── Chips grid ── */
+.ssb2-chips {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+}
+
+.ssb2-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 14px 12px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    border-right: 1px solid #f3f4f6;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.15s;
+    text-align: left;
+    min-width: 0;
+    position: relative;
+}
+
+.ssb2-chip:last-child {
+    border-right: none;
+}
+
+.ssb2-chip:hover {
+    background: #f9fafb;
+}
+
+.ssb2-chip.active {
+    background: #fafafe;
+}
+
+.ssb2-chip-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+}
+
+.ssb2-chip-count {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    color: #111827;
+}
+
+.ssb2-chip.active .ssb2-chip-count {
+    color: #6366f1;
+}
+
+.ssb2-chip-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: #9ca3af;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.ssb2-chip-pct {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 6px;
+}
+
+/* ── Divider ── */
+.ssb2-rule {
+    height: 1px;
+    background: #f0f0f0;
+}
+
+/* ── Filter row ── */
+.ssb2-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: #fafafa;
+    height: 42px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.ssb2-filters::-webkit-scrollbar {
+    display: none;
+}
+
+.ssb2-filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    margin-right: 2px;
+}
+
+.ssb2-clear-btn {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: #ef4444;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 2px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .ssb2-chips {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .ssb2-chip:nth-child(4) {
+        border-right: none;
+    }
+
+    .ssb2-chip:nth-child(4)~.ssb2-chip {
+        border-top: 1px solid #f3f4f6;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+    .ssb2-chips {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ssb2-chip {
+        border-right: 1px solid #f3f4f6;
+    }
+
+    .ssb2-chip:nth-child(even) {
+        border-right: none;
+    }
+
+    .ssb2-chip-count {
+        font-size: 17px;
+    }
+
+    .ssb2-title-text {
+        font-size: 13px;
+    }
+}
