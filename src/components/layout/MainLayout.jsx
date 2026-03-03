@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Layout, Menu, Button, Badge, Avatar, Dropdown, theme } from 'antd';
+import tariffAiLogo from '../../assets/tariff-ai-logo.png';
 import {
     AppstoreOutlined,
     BarChartOutlined,
@@ -91,6 +92,7 @@ const MainLayout = ({ children }) => {
     } = theme.useToken();
     const navigate = useNavigate();
     const location = useLocation();
+    const isTariffAi = location.pathname === '/tariff-ai';
 
     const menuItems = [
         {
@@ -121,6 +123,11 @@ const MainLayout = ({ children }) => {
         {
             type: 'divider',
             style: { borderColor: 'rgba(255,255,255,0.1)', margin: '12px 16px' },
+        },
+        {
+            key: '/tariff-ai',
+            icon: <img src={tariffAiLogo} alt="Tariff AI" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
+            label: 'Tariff AI',
         },
         {
             key: 'products-sub',
@@ -316,11 +323,13 @@ const MainLayout = ({ children }) => {
                 </Header>
                 <Content
                     style={{
-                        margin: '24px 16px',
-                        padding: 24,
+                        margin: isTariffAi ? 0 : '24px 16px',
+                        padding: isTariffAi ? 0 : 24,
                         minHeight: 280,
-                        overflowY: 'auto',
+                        overflowY: isTariffAi ? 'hidden' : 'auto',
                         flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
                     }}
                 >
                     {children}

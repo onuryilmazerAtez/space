@@ -1,12 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
-import ChatWidget from './components/ChatWidget';
+
 import Dashboard from './pages/Dashboard';
 import UsersPage from './pages/UsersPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
 import TaxCalculationPage from './pages/TaxCalculationPage';
+import TariffAiPage from './pages/TariffAiPage';
 
 function App() {
     return (
@@ -19,9 +20,10 @@ function App() {
                     <Route path="/reports" element={<ReportsPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/tax-calculation" element={<TaxCalculationPage />} />
+                    <Route path="/tariff-ai" element={<TariffAiPage />} />
                 </Routes>
             </MainLayout>
-            <ChatWidget />
+
         </Router>
     );
 }
