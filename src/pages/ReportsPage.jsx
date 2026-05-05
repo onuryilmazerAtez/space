@@ -2137,17 +2137,6 @@ export default function ReportsPage() {
                                     onChange={(dates) => { setFirmaRaporDateRange(dates); setFirmaRaporFiltered(false); }}
                                 />
                                 <Button type="primary" icon={<SearchOutlined />} onClick={handleFirmaFilter}>Filtrele</Button>
-                                <Dropdown
-                                    menu={{
-                                        items: [
-                                            { key: 'excel', label: 'Excel (.xlsx)', icon: <FileExcelOutlined />, onClick: handleFirmaExportExcel },
-                                            { key: 'csv', label: 'CSV (.csv)', icon: <DownloadOutlined />, onClick: handleFirmaExportCSV },
-                                        ]
-                                    }}
-                                    disabled={!firmaRaporFiltered || filteredFirmaData.length === 0}
-                                >
-                                    <Button icon={<DownloadOutlined />}>Dışa Aktar</Button>
-                                </Dropdown>
                             </Space>
                         </Card>
 

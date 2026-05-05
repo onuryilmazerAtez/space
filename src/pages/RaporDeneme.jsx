@@ -306,7 +306,7 @@ function Sidebar() {
       </AntCard>
 
       {/* Son Raporlar */}
-      <AntCard style={{ padding: `${token.paddingLG}px ${token.paddingLG}px ${token.paddingSM}px` }}>
+      <AntCard style={{ padding: `${token.paddingLG}px ${token.paddingLG}px ${token.paddingSM}px`, boxShadow: "none" }}>
         <div style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
           marginBottom: token.margin,
