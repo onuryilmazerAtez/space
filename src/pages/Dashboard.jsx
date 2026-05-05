@@ -3,6 +3,7 @@ import { Row, Col, Card, Typography, Statistic, Progress, Avatar, List, Button, 
 import { ArrowUpOutlined, ArrowDownOutlined, UserOutlined, DollarCircleOutlined, ProjectOutlined, CalculatorOutlined, RiseOutlined, FallOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import ShipmentStatusBar from '../components/ShipmentStatusBar';
+import BorderGlow from '../components/BorderGlow';
 
 const { Title, Text } = Typography;
 
@@ -91,9 +92,9 @@ const Dashboard = () => {
 
             {/* Stats Grid */}
             <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
-                {stats.map((stat, idx) => (
-                    <Col xs={24} sm={8} key={idx}>
-                        <Card bordered={false} bodyStyle={{ padding: 24 }}>
+                {stats.map((stat, idx) => {
+                    const cardContent = (
+                        <Card bordered={false} bodyStyle={{ padding: 24 }} style={idx === 1 ? { background: 'transparent', boxShadow: 'none' } : undefined}>
                             <Statistic
                                 title={<Text type="secondary">{stat.title}</Text>}
                                 value={stat.value}
@@ -109,8 +110,27 @@ const Dashboard = () => {
                                 <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>from last month</Text>
                             </div>
                         </Card>
-                    </Col>
-                ))}
+                    );
+
+                    return (
+                        <Col xs={24} sm={8} key={idx}>
+                            {idx === 1 ? (
+                                <BorderGlow
+                                    edgeSensitivity={32}
+                                    borderRadius={43}
+                                    glowRadius={32}
+                                    glowIntensity={2.5}
+                                    animated={true}
+                                    backgroundColor="#ffffff"
+                                    glowColor="210 60 50"
+                                    colors={['#214F73', '#69c0ff', '#1890ff']}
+                                >
+                                    {cardContent}
+                                </BorderGlow>
+                            ) : cardContent}
+                        </Col>
+                    );
+                })}
             </Row>
 
             {/* Tax Calculation Card */}

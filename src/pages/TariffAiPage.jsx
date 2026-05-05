@@ -589,6 +589,329 @@ const SCREENS = { HOME: "home", CHAT: "chat" };
 
 let sessionCounter = 1;
 
+/* ── Credit Banner Components ────────────────────────────── */
+const INITIAL_CREDITS = 5; // Demo: 5 sorgu hakkı
+const LOW_CREDIT_THRESHOLD = 2;
+
+function LowCreditBanner({ credits, onBuyCredits }) {
+    return (
+        <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            background: "linear-gradient(90deg, #fffbe6, #fff7cc)",
+            border: "1px solid #ffe58f",
+            borderRadius: 8, padding: "10px 16px",
+            gap: 12,
+            animation: "fadeIn 0.4s ease",
+        }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L2 20h20L12 2z" fill="#faad14" />
+                    <path d="M12 9v5" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="12" cy="17" r="1" fill="white" />
+                </svg>
+                <span style={{ fontSize: 13, color: "#7c5800", fontFamily: ds.fonts.family }}>
+                    <strong>Krediniz azalıyor!</strong> Yalnızca <strong>{credits}</strong> AI sorgunuz kaldı.
+                </span>
+            </div>
+            <button
+                onClick={onBuyCredits}
+                style={{
+                    background: "#faad14", color: "white", border: "none",
+                    borderRadius: 6, padding: "5px 14px", fontSize: 12, fontWeight: 600,
+                    cursor: "pointer", fontFamily: ds.fonts.family, whiteSpace: "nowrap",
+                    transition: "background 0.15s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "#d48806"}
+                onMouseLeave={e => e.currentTarget.style.background = "#faad14"}
+            >
+                Kredi Al
+            </button>
+        </div>
+    );
+}
+
+/* ── Sparkle Icon for packages ────────────────────────────── */
+const SparkleIcon = ({ size = 16, color = "#faad14" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C12 8 8 12 2 12C8 12 12 16 12 22C12 16 16 12 22 12C16 12 12 8 12 2Z" fill={color} />
+    </svg>
+);
+
+const CreditCoinIcon = ({ size = 48 }) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+        <defs>
+            <linearGradient id="coinGrad" x1="0" y1="0" x2="48" y2="48">
+                <stop offset="0%" stopColor="#ffd700" />
+                <stop offset="50%" stopColor="#ffaa00" />
+                <stop offset="100%" stopColor="#ff8c00" />
+            </linearGradient>
+            <linearGradient id="coinShine" x1="0" y1="0" x2="48" y2="48">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.6)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+            </linearGradient>
+        </defs>
+        <circle cx="24" cy="24" r="22" fill="url(#coinGrad)" />
+        <circle cx="24" cy="24" r="18" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
+        <circle cx="24" cy="24" r="22" fill="url(#coinShine)" opacity="0.3" />
+        <text x="24" y="30" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="Inter, sans-serif">T</text>
+    </svg>
+);
+
+const PACKAGES = [
+    {
+        id: "premium",
+        name: "Premium Pack",
+        price: "€79",
+        priceSub: ".90",
+        priceNote: "/month",
+        iconBg: "linear-gradient(135deg, #FF8C00, #FFA040)",
+        recommended: true,
+        crown: true,
+        features: [
+            "HS Code Search & Lookup",
+            "Advanced Duty & Tax Calculation",
+            "Country-Specific Tariff Data (TR-EU-CH-UK)",
+            "Country of Origin Impact (TR)",
+            "Advanced Query Results",
+            "Priority Email Support",
+            "AI Assistant for Tariff Classification",
+            "AI Assistant for Compliance Requirements",
+            "AI Assistant for Duty & Tax Optimization",
+            "AI Assistant for Scenario Comparison",
+        ],
+        buttonDark: true,
+    },
+    {
+        id: "premium_plus",
+        name: "Premium Plus Pack",
+        price: "€159",
+        priceSub: ".90",
+        priceNote: "/month",
+        iconBg: "linear-gradient(135deg, #7B2FBE, #9C40D4)",
+        recommended: false,
+        crown: false,
+        features: [
+            "HS Code Search & Lookup",
+            "Advanced Duty & Tax Calculation",
+            "Country-Specific Tariff Data (TR-EU-CH-UK)",
+            "Country of Origin Impact (TR)",
+            "Advanced Query Results",
+            "Priority Email Support",
+            "AI Assistant for Tariff Classification",
+            "AI Assistant for Compliance Requirements",
+            "AI Assistant for Duty & Tax Optimization",
+            "AI Assistant for Scenario Comparison",
+        ],
+        buttonDark: false,
+    },
+];
+
+function TokenExhaustedChatCard({ onBuyCredits }) {
+    const [expandedPkg, setExpandedPkg] = useState(null);
+    const FEATURES_SHOWN = 4;
+
+    const PkgIcon = ({ crown }) => crown ? (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M2 20h20M5 20L3 8l5.5 4L12 4l3.5 8L21 8l-2 12H5z" stroke="white" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" fill="white" fillOpacity="0.85" />
+        </svg>
+    ) : (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M8 21h8M12 17v4" stroke="white" strokeWidth="1.7" strokeLinecap="round" />
+            <path d="M5 3h14M5 3C5 9 7.5 13 12 14C16.5 13 19 9 19 3" stroke="white" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M5 3C5 3 3 3 3 6.5C3 9.5 5.5 11 7.5 11" stroke="white" strokeWidth="1.7" strokeLinecap="round" />
+            <path d="M19 3C19 3 21 3 21 6.5C21 9.5 18.5 11 16.5 11" stroke="white" strokeWidth="1.7" strokeLinecap="round" />
+        </svg>
+    );
+
+    const FeatureCheck = () => (
+        <div style={{
+            width: 22, height: 22, borderRadius: "50%",
+            background: "#dcfce7", border: "1.5px solid #bbf7d0",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2.5 6L5 8.5L9.5 3.5" stroke="#16a34a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        </div>
+    );
+
+    return (
+        <div style={{ animation: "fadeIn 0.6s ease", margin: "12px 0 24px", fontFamily: ds.fonts.family }}>
+            {/* ── Warning card ── */}
+            <div style={{
+                background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+                borderRadius: 16, padding: "28px 24px", position: "relative", overflow: "hidden",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+            }}>
+                <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle, rgba(26,115,232,0.25) 0%, transparent 70%)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", bottom: -30, left: -30, width: 120, height: 120, borderRadius: "50%", background: "radial-gradient(circle, rgba(251,188,4,0.2) 0%, transparent 70%)", pointerEvents: "none" }} />
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 16, position: "relative", zIndex: 2 }}>
+                    <div style={{ width: 52, height: 52, borderRadius: 13, background: "linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,140,0,0.15))", border: "1px solid rgba(255,215,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <CreditCoinIcon size={34} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                            <span style={{ fontSize: 17, fontWeight: 700, color: "#ffffff" }}>AI Krediniz Tükendi</span>
+                            <span style={{ background: "linear-gradient(135deg, #ff4d4f, #cf1322)", color: "white", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 20, textTransform: "uppercase" }}>0 Kredi</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.6 }}>
+                            Tariff AI ile sınıflandırma, vergi hesaplama ve ithalat analizi yapmaya devam etmek için aşağıdaki paketlerden birini seçin.
+                        </p>
+                    </div>
+                </div>
+                <div style={{ marginTop: 18, position: "relative", zIndex: 2 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)" }}>Kullanılan Kredi</span>
+                        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)" }}>5 / 5</span>
+                    </div>
+                    <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: "100%", borderRadius: 3, background: "linear-gradient(90deg, #ff4d4f, #cf1322)" }} />
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Package cards — 2 columns ── */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16, alignItems: "start" }}>
+                {PACKAGES.map(pkg => {
+                    const isExpanded = expandedPkg === pkg.id;
+                    const visibleFeatures = pkg.features.slice(0, FEATURES_SHOWN);
+                    const hiddenCount = pkg.features.length - FEATURES_SHOWN;
+
+                    return (
+                        <div key={pkg.id}>
+                            {/* RECOMMENDED label */}
+                            {pkg.recommended && (
+                                <div style={{ textAlign: "center", marginBottom: 8, fontSize: 11, fontWeight: 700, color: "#FF8C00", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                                    RECOMMENDED
+                                </div>
+                            )}
+                            {!pkg.recommended && <div style={{ marginBottom: 8, height: 17 }} />}
+
+                            <div style={{
+                                background: "#ffffff", borderRadius: 20,
+                                padding: "24px 20px 20px",
+                                border: "1px solid #f0f0f0",
+                                boxShadow: "0 2px 16px rgba(0,0,0,0.08)",
+                            }}>
+                                {/* Icon */}
+                                <div style={{ width: 58, height: 58, borderRadius: 14, background: pkg.iconBg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                                    <PkgIcon crown={pkg.crown} />
+                                </div>
+
+                                {/* Name */}
+                                <div style={{ fontSize: 20, fontWeight: 700, color: "#1a1a1a", marginBottom: 12, lineHeight: 1.2 }}>
+                                    {pkg.name}
+                                </div>
+
+                                {/* Price */}
+                                <div style={{ display: "flex", alignItems: "flex-end", gap: 0, marginBottom: 16 }}>
+                                    <span style={{ fontSize: 44, fontWeight: 800, color: "#1a1a1a", lineHeight: 1, letterSpacing: "-0.03em" }}>{pkg.price}</span>
+                                    <span style={{ fontSize: 18, fontWeight: 700, color: "#1a1a1a", marginBottom: 5 }}>{pkg.priceSub}</span>
+                                    <span style={{ fontSize: 13, color: "#888", marginBottom: 6, marginLeft: 6 }}>{pkg.priceNote}</span>
+                                </div>
+
+                                {/* CTA */}
+                                <button
+                                    onClick={onBuyCredits}
+                                    style={{
+                                        width: "100%", padding: "13px 0", borderRadius: 12,
+                                        border: pkg.buttonDark ? "none" : "1.5px solid #d0d0d0",
+                                        background: pkg.buttonDark ? "#1a1a1a" : "#ffffff",
+                                        color: pkg.buttonDark ? "#ffffff" : "#1a1a1a",
+                                        fontSize: 15, fontWeight: 600, cursor: "pointer",
+                                        fontFamily: ds.fonts.family, marginBottom: 20,
+                                        transition: "opacity 0.15s",
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.opacity = "0.82"}
+                                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                                >
+                                    Satın Al
+                                </button>
+
+                                {/* Features */}
+                                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                    {visibleFeatures.map((f, i) => (
+                                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                                            <FeatureCheck />
+                                            <span style={{ fontSize: 13.5, color: "#333", lineHeight: 1.4, paddingTop: 2 }}>{f}</span>
+                                        </div>
+                                    ))}
+
+                                    {isExpanded && pkg.features.slice(FEATURES_SHOWN).map((f, i) => (
+                                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, animation: "fadeIn 0.25s ease" }}>
+                                            <FeatureCheck />
+                                            <span style={{ fontSize: 13.5, color: "#333", lineHeight: 1.4, paddingTop: 2 }}>{f}</span>
+                                        </div>
+                                    ))}
+
+                                    {hiddenCount > 0 && (
+                                        <button
+                                            onClick={() => setExpandedPkg(isExpanded ? null : pkg.id)}
+                                            style={{ background: "none", border: "none", cursor: "pointer", color: "#1a73e8", fontSize: 13, fontWeight: 500, padding: "2px 0", textAlign: "left", fontFamily: ds.fonts.family }}
+                                        >
+                                            {isExpanded ? "Daha az göster" : `+ ${hiddenCount} özellik daha göster`}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function NoCreditBanner({ onBuyCredits }) {
+    return (
+        <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            background: "linear-gradient(90deg, #fff1f0, #ffe7e5)",
+            border: "1px solid #ffa39e",
+            borderRadius: 10, padding: "16px 20px",
+            gap: 16,
+            animation: "fadeIn 0.4s ease",
+        }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                    width: 40, height: 40, borderRadius: 10,
+                    background: "#fff1f0", border: "1px solid #ffa39e",
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" fill="#ff4d4f" />
+                        <path d="M12 7v6" stroke="white" strokeWidth="2.2" strokeLinecap="round" />
+                        <circle cx="12" cy="17" r="1.2" fill="white" />
+                    </svg>
+                </div>
+                <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#a8071a", fontFamily: ds.fonts.family }}>
+                        Krediniz Tükendi
+                    </div>
+                    <div style={{ fontSize: 12, color: "#cf1322", fontFamily: ds.fonts.family, marginTop: 2 }}>
+                        Tariff AI'ı kullanmaya devam etmek için kredi satın alın.
+                    </div>
+                </div>
+            </div>
+            <button
+                onClick={onBuyCredits}
+                style={{
+                    background: "linear-gradient(135deg, #ff4d4f, #cf1322)",
+                    color: "white", border: "none",
+                    borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 700,
+                    cursor: "pointer", fontFamily: ds.fonts.family, whiteSpace: "nowrap",
+                    boxShadow: "0 2px 8px rgba(255,77,79,0.35)",
+                    transition: "opacity 0.15s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+            >
+                ✦ Kredi Satın Al
+            </button>
+        </div>
+    );
+}
+
 export default function TariffAiPage() {
     const [screen, setScreen] = useState(SCREENS.HOME);
     const [selectedTool, setSelectedTool] = useState(null);
@@ -606,10 +929,23 @@ export default function TariffAiPage() {
     const [linkInputVisible, setLinkInputVisible] = useState(false);
     const [linkValue, setLinkValue] = useState("");
     const [attachedFiles, setAttachedFiles] = useState([]);
+    const [userCredits, setUserCredits] = useState(INITIAL_CREDITS);
     const chatEndRef = useRef(null);
     const inputRef = useRef(null);
     const fileInputRef = useRef(null);
     const imageInputRef = useRef(null);
+
+    const isOutOfCredits = userCredits <= 0;
+    const isLowCredits = userCredits > 0 && userCredits <= LOW_CREDIT_THRESHOLD;
+
+    // Navigate to Settings to buy credits
+    const handleBuyCredits = () => {
+        // In real app: navigate('/settings'). Here we use a simple approach.
+        const event = new CustomEvent('navigate-to-settings', { detail: { tab: 'credits' } });
+        window.dispatchEvent(event);
+        // Demo fallback alert
+        alert("Kredi satın almak için Ayarlar > Kredi Bakiyesi bölümüne gidin.");
+    };
 
     const handleAttachPdf = () => {
         setShowAttachMenu(false);
@@ -683,7 +1019,8 @@ export default function TariffAiPage() {
     const streamRef = useRef(null);
 
     function sendMessage(text) {
-        if (!text.trim() || isThinking) return;
+        if (!text.trim() || isThinking || isOutOfCredits) return;
+        setUserCredits(prev => Math.max(0, prev - 1));
         const userMsg = { role: "user", content: text };
         setMessages(prev => [...prev, userMsg]);
         setInput("");
@@ -834,6 +1171,9 @@ export default function TariffAiPage() {
         @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap');
         @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         @keyframes spin { to { transform:rotate(360deg); } }
+        @keyframes sparkle1 { 0%,100% { opacity:0.3; transform:scale(0.8); } 50% { opacity:1; transform:scale(1.2); } }
+        @keyframes sparkle2 { 0%,100% { opacity:0.2; transform:scale(0.6) rotate(0deg); } 50% { opacity:0.8; transform:scale(1.1) rotate(180deg); } }
+        @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(26,115,232,0.3); } 50% { box-shadow: 0 0 0 8px rgba(26,115,232,0); } }
         .chat-scroll::-webkit-scrollbar { width:6px; }
         .chat-scroll::-webkit-scrollbar-thumb { background:#dadce0; border-radius:3px; }
         .tariff-textarea { resize:none; outline:none; font-family:'Inter','Google Sans',sans-serif; }
@@ -963,9 +1303,24 @@ export default function TariffAiPage() {
                             </div>
                         ))}
 
+                        {/* ── Token Exhausted In-Chat Card ── */}
+                        {isOutOfCredits && (
+                            <TokenExhaustedChatCard onBuyCredits={handleBuyCredits} />
+                        )}
+
                         <div ref={chatEndRef} />
                     </div>
                 </div>
+
+                {/* Credit banners — shown above input, aligned with chat area */}
+                {(isOutOfCredits || isLowCredits) && (
+                    <div style={{ flexShrink: 0, padding: "0 24px 8px" }}>
+                        <div style={{ maxWidth: 780, margin: "0 auto" }}>
+                            {isOutOfCredits && <NoCreditBanner onBuyCredits={handleBuyCredits} />}
+                            {isLowCredits && <LowCreditBanner credits={userCredits} onBuyCredits={handleBuyCredits} />}
+                        </div>
+                    </div>
+                )}
 
                 {/* Fixed input at bottom */}
                 <div style={{ flexShrink: 0, padding: "0 24px 24px", background: "transparent", zIndex: 10 }}>
@@ -1086,8 +1441,8 @@ export default function TariffAiPage() {
                                             value={input}
                                             onChange={e => setInput(e.target.value)}
                                             onKeyDown={handleKeyDown}
-                                            disabled={isThinking}
-                                            placeholder='Örn: "Pamuklu gömlekler için ithalat...'
+                                            disabled={isThinking || isOutOfCredits}
+                                            placeholder={isOutOfCredits ? 'Kredi satın alarak sohbete devam edin...' : 'Örn: "Pamuklu gömlekler için ithalat...'}
                                             style={{
                                                 width: "100%", border: "none", outline: "none", resize: "none",
                                                 fontSize: "14px", color: ds.colors.text, lineHeight: "1.55",
@@ -1118,22 +1473,22 @@ export default function TariffAiPage() {
 
                                         {/* Send button */}
                                         <button
-                                            disabled={!input.trim() || isThinking}
+                                            disabled={!input.trim() || isThinking || isOutOfCredits}
                                             onClick={() => sendMessage(input)}
                                             style={{
                                                 width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center",
-                                                background: (!input.trim() || isThinking) ? "#f5f5f5" : "#1890ff",
-                                                boxShadow: (!input.trim() || isThinking) ? "none" : "0 2px 4px 0 rgba(24,144,255,0.3)",
+                                                background: (!input.trim() || isThinking || isOutOfCredits) ? "#f5f5f5" : "#1890ff",
+                                                boxShadow: (!input.trim() || isThinking || isOutOfCredits) ? "none" : "0 2px 4px 0 rgba(24,144,255,0.3)",
                                                 border: "none",
-                                                cursor: (!input.trim() || isThinking) ? "not-allowed" : "pointer",
+                                                cursor: (!input.trim() || isThinking || isOutOfCredits) ? "not-allowed" : "pointer",
                                                 transition: "background 0.15s"
                                             }}
-                                            onMouseEnter={e => { if (input.trim() && !isThinking) e.currentTarget.style.background = "#40a9ff"; }}
-                                            onMouseLeave={e => { if (input.trim() && !isThinking) e.currentTarget.style.background = "#1890ff"; }}
+                                            onMouseEnter={e => { if (input.trim() && !isThinking && !isOutOfCredits) e.currentTarget.style.background = "#40a9ff"; }}
+                                            onMouseLeave={e => { if (input.trim() && !isThinking && !isOutOfCredits) e.currentTarget.style.background = "#1890ff"; }}
                                         >
                                             <svg width="16" height="16" viewBox="0 0 14 14" fill="none" style={{ transform: "rotate(-45deg)" }}>
                                                 <g clipPath="url(#clip_send2)">
-                                                    <path d="M0.311839 0.226399C0.369559 0.212434 0.430685 0.218438 0.483714 0.244953L13.554 6.79769C13.6773 6.86025 13.7272 7.01065 13.6663 7.13558C13.6414 7.18229 13.6022 7.22245 13.554 7.24593L0.483714 13.7616C0.358714 13.8225 0.208714 13.7727 0.147777 13.6493C0.121271 13.5978 0.114247 13.5371 0.128246 13.4793L1.47883 7.96859C1.49758 7.88577 1.55871 7.81995 1.63996 7.79183L3.94563 6.99984L1.63801 6.20687C1.55695 6.18031 1.49629 6.11368 1.4759 6.03109L0.128246 0.52718C0.112823 0.463117 0.123375 0.395064 0.157542 0.338703C0.191816 0.282296 0.247758 0.24224 0.311839 0.226399ZM2.45539 5.29964L7.0677 6.8807C7.13324 6.9041 7.16752 6.97433 7.14582 7.03988C7.13334 7.07734 7.10359 7.10548 7.0677 7.118L2.45539 8.70101L1.66926 11.9139L11.4847 7.01937L1.67219 2.09945L2.45539 5.29964Z" fill={!input.trim() || isThinking ? "#9ca3af" : "white"} />
+                                                    <path d="M0.311839 0.226399C0.369559 0.212434 0.430685 0.218438 0.483714 0.244953L13.554 6.79769C13.6773 6.86025 13.7272 7.01065 13.6663 7.13558C13.6414 7.18229 13.6022 7.22245 13.554 7.24593L0.483714 13.7616C0.358714 13.8225 0.208714 13.7727 0.147777 13.6493C0.121271 13.5978 0.114247 13.5371 0.128246 13.4793L1.47883 7.96859C1.49758 7.88577 1.55871 7.81995 1.63996 7.79183L3.94563 6.99984L1.63801 6.20687C1.55695 6.18031 1.49629 6.11368 1.4759 6.03109L0.128246 0.52718C0.112823 0.463117 0.123375 0.395064 0.157542 0.338703C0.191816 0.282296 0.247758 0.24224 0.311839 0.226399ZM2.45539 5.29964L7.0677 6.8807C7.13324 6.9041 7.16752 6.97433 7.14582 7.03988C7.13334 7.07734 7.10359 7.10548 7.0677 7.118L2.45539 8.70101L1.66926 11.9139L11.4847 7.01937L1.67219 2.09945L2.45539 5.29964Z" fill={!input.trim() || isThinking || isOutOfCredits ? "#9ca3af" : "white"} />
                                                 </g>
                                                 <defs><clipPath id="clip_send2"><rect fill="white" height="14" width="14" /></clipPath></defs>
                                             </svg>

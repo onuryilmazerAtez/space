@@ -110,10 +110,33 @@ const MainLayout = ({ children }) => {
             icon: <UserOutlined />,
             label: 'Users',
         },
+
         {
-            key: '/reports',
+            key: 'reports-sub',
             icon: <FileTextOutlined />,
             label: 'Raporlar',
+            children: [
+                {
+                    key: '/rapor-deneme',
+                    icon: <BarChartOutlined />,
+                    label: 'Genel Raporlar',
+                },
+                {
+                    key: '/reports/kpi',
+                    icon: <FundProjectionScreenOutlined />,
+                    label: 'KPI Raporları',
+                },
+            ],
+        },
+        {
+            key: '/firmalarim',
+            icon: <BankOutlined />,
+            label: 'Firmalarım',
+        },
+        {
+            key: '/btb',
+            icon: <AuditOutlined />,
+            label: 'BTB',
         },
         {
             key: '/settings',
@@ -294,7 +317,7 @@ const MainLayout = ({ children }) => {
                     }}
                 />
             </Sider>
-            <Layout style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100vh' }}>
+            <Layout style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100vh', background: '#F0F2F5' }}>
                 <Header style={{ padding: '0 24px', background: colorBgContainer, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', zIndex: 99, flexShrink: 0, position: 'sticky', top: 0 }}>
                     <Button
                         type="text"
