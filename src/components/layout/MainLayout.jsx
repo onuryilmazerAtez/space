@@ -121,11 +121,6 @@ const MainLayout = ({ children }) => {
                     icon: <BarChartOutlined />,
                     label: 'Genel Raporlar',
                 },
-                {
-                    key: '/reports/kpi',
-                    icon: <FundProjectionScreenOutlined />,
-                    label: 'KPI Raporları',
-                },
             ],
         },
         {

@@ -598,11 +598,19 @@ function exportToExcel(data, sheetName, filename) {
 // ─── LocalStorage Helpers ──────────────────────────────────────────────────
 const LS_KEY_GENERATED = 'space_generated_reports';
 
+const MOCK_INITIAL_REPORTS = [
+    { id: '1', title: 'ABC Lojistik A.Ş. — Q1 2026 Eşya Kataloğu', category: 'musteri', date: '2026-04-28T10:15:00.000Z', createdBy: 'Ersan Yılmaz', items: new Array(42) },
+    { id: '2', title: 'Mart 2026 Toplu Vergi Sorgulama', category: 'vergi', date: '2026-04-15T08:30:00.000Z', createdBy: 'Ayşe Kaya', items: new Array(118) },
+    { id: '3', title: 'XYZ Dış Ticaret — GTİP Karşılaştırma Raporu', category: 'karsilastirma', date: '2026-04-10T14:00:00.000Z', createdBy: 'Selin Arslan', items: new Array(27) },
+    { id: '4', title: 'Mega İthalat A.Ş. Ürün Portföyü 2026', category: 'musteri', date: '2026-03-31T11:45:00.000Z', createdBy: 'Mehmet Demir', items: new Array(65) },
+    { id: '5', title: 'Lüks Import Ltd — Şubat Vergi Analizi', category: 'vergi', date: '2026-03-20T09:00:00.000Z', createdBy: 'Okan Çelik', items: new Array(33) },
+];
+
 const getSavedReports = (key) => {
     try {
         const d = localStorage.getItem(key);
-        return d ? JSON.parse(d) : [];
-    } catch (e) { return []; }
+        return d ? JSON.parse(d) : MOCK_INITIAL_REPORTS;
+    } catch (e) { return MOCK_INITIAL_REPORTS; }
 };
 
 const saveReportsToLS = (key, data) => {
@@ -2232,9 +2240,10 @@ export default function ReportsPage() {
 
 
 
-    // Raporlarım kategorileri (hazır raporlardaki 4 kategori)
+    const [selectedReportKeys, setSelectedReportKeys] = useState([]);
+
+    // Raporlarım kategorileri
     const RAPORLARIM_CATEGORIES = [
-        { key: 'performans', label: 'KPI Raporu', color: '#1677ff' },
         { key: 'vergi', label: 'Toplu TR Vergi Sorgulama', color: '#faad14' },
         { key: 'karsilastirma', label: 'GTİP Karşılaştırma & Ülke Vergi', color: '#722ed1' },
         { key: 'musteri', label: 'Firma Bazlı Eşya Raporu', color: '#52c41a' },
@@ -2262,28 +2271,53 @@ export default function ReportsPage() {
         },
         { title: 'Oluşturan', dataIndex: 'createdBy', key: 'createdBy', render: v => v || 'Sistem' },
         { title: 'Tarih', dataIndex: 'date', key: 'date', render: v => new Date(v).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }) },
-        { title: 'Eşya Sayısı', dataIndex: 'items', key: 'items', render: v => <Tag color="blue">{(v?.length || 0)} eşya</Tag> },
+        { title: 'Eşya Sayısı', dataIndex: 'items', key: 'items', render: v => v?.length || 0 },
         {
-            title: '', key: 'actions', width: 180, fixed: 'right',
+            title: '', key: 'actions', width: 160, fixed: 'right',
             render: (_, record) => (
                 <Space>
-                    <Tooltip title="Düzenle"><Button size="small" type="text" icon={<EditOutlined />} onClick={() => handleEditReport(record)} /></Tooltip>
-                    <Tooltip title="Paylaş"><Button size="small" type="text" icon={<SendOutlined />} onClick={() => { setReportToShare(record); setShareModalVisible(true); }} /></Tooltip>
-                    <Tooltip title="İndir"><Button size="small" type="text" icon={<DownloadOutlined />} onClick={() => exportToExcel(record.items || [], 'Rapor', record.title)} /></Tooltip>
+                    <Tooltip title="Düzenle"><Button size="small" type="default" icon={<EditOutlined />} onClick={() => handleEditReport(record)} /></Tooltip>
+                    <Tooltip title="Paylaş"><Button size="small" type="default" icon={<SendOutlined />} onClick={() => { setReportToShare(record); setShareModalVisible(true); }} /></Tooltip>
+                    <Tooltip title="İndir"><Button size="small" type="default" icon={<DownloadOutlined />} onClick={() => exportToExcel(record.items || [], 'Rapor', record.title)} /></Tooltip>
                     <Popconfirm title="Silmek istediğinize emin misiniz?" onConfirm={() => handleDeleteReport(record.id)} okText="Evet" cancelText="İptal">
-                        <Tooltip title="Sil"><Button size="small" type="text" danger icon={<DeleteOutlined />} /></Tooltip>
+                        <Tooltip title="Sil"><Button size="small" type="default" danger icon={<DeleteOutlined />} /></Tooltip>
                     </Popconfirm>
                 </Space>
             )
         }
     ];
 
+    const handleBulkDelete = () => {
+        const updated = generatedReports.filter(r => !selectedReportKeys.includes(r.id));
+        setGeneratedReports(updated);
+        saveReportsToLS(LS_KEY_GENERATED, updated);
+        setSelectedReportKeys([]);
+        message.success(`${selectedReportKeys.length} rapor silindi.`);
+    };
+
     const renderReportList = (data) => {
+        const rowSelection = {
+            type: 'checkbox',
+            selectedRowKeys: selectedReportKeys,
+            onChange: setSelectedReportKeys,
+        };
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/rapor-deneme')} type="text" size="large" />
                     <Title level={4} style={{ margin: 0 }}>Raporlarım</Title>
+                    {selectedReportKeys.length > 0 && (
+                        <Popconfirm
+                            title={`${selectedReportKeys.length} raporu silmek istediğinize emin misiniz?`}
+                            onConfirm={handleBulkDelete}
+                            okText="Evet, Sil"
+                            cancelText="İptal"
+                        >
+                            <Button danger icon={<DeleteOutlined />} style={{ marginLeft: 'auto' }}>
+                                {selectedReportKeys.length} Raporu Sil
+                            </Button>
+                        </Popconfirm>
+                    )}
                 </div>
                 {data.length === 0 ? (
                     <Card style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none' }}>
@@ -2298,6 +2332,7 @@ export default function ReportsPage() {
                             columns={reportListCols}
                             dataSource={data}
                             rowKey="id"
+                            rowSelection={rowSelection}
                             pagination={data.length > 10 ? { pageSize: 10 } : false}
                             size="middle"
                             scroll={{ x: 900 }}

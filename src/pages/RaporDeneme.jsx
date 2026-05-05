@@ -43,13 +43,6 @@ const token = {
 };
 
 /* Lucide-style SVG ikonlar - nötr renkler */
-const IconKPI = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 3v18h18"/>
-    <path d="m19 9-5 5-4-4-3 3"/>
-  </svg>
-);
-
 const IconVergi = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -97,13 +90,6 @@ const ArrowRight = () => (
 );
 
 const REPORT_CARDS = [
-  {
-    category: "Performans",
-    icon: <IconKPI />,
-    title: "KPI Raporu",
-    desc: "Firma bazında eşya yükleme, hizmet dağılımı ve sınıflandırma performansını gösterir.",
-    route: "/reports?report=kpi",
-  },
   {
     category: "Vergi",
     icon: <IconVergi />,
@@ -264,7 +250,7 @@ function Sidebar() {
     <aside style={{ display: "flex", flexDirection: "column", gap: token.marginLG }}>
 
       {/* Raporlar Modülü — Ant Design tarzı kart */}
-      <AntCard style={{ padding: 0, overflow: "hidden" }}>
+      <AntCard style={{ padding: 0, overflow: "hidden", boxShadow: "none" }}>
         {/* Başlık */}
         <div style={{
           padding: `${token.paddingSM}px ${token.paddingLG}px`,
@@ -381,12 +367,22 @@ function Sidebar() {
       </AntCard>
 
       {/* Yönetici Raporu CTA */}
-      <AntCard style={{ padding: token.paddingLG, background: token.colorPrimary, border: "none" }}>
-        <div style={{
-          fontSize: token.fontSizeLG, fontWeight: token.fontWeightStrong,
-          color: "#fff", marginBottom: 6, fontFamily: token.fontFamily,
-        }}>
-          Yönetici Raporları
+      <AntCard style={{ padding: token.paddingLG, background: "linear-gradient(135deg, #1677ff 0%, #7B2FBE 100%)", border: "none" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+            <path d="M4 22h16"/>
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
+          </svg>
+          <div style={{
+            fontSize: token.fontSizeLG, fontWeight: token.fontWeightStrong,
+            color: "#fff", fontFamily: token.fontFamily,
+          }}>
+            Yönetici Raporları
+          </div>
         </div>
         <div style={{
           fontSize: token.fontSizeSM, color: "rgba(255,255,255,0.75)",
