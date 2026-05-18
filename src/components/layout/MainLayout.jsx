@@ -93,6 +93,8 @@ const MainLayout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const isTariffAi = location.pathname === '/tariff-ai';
+    const isBtb = location.pathname === '/btb';
+    const isKpiReport = location.pathname === '/reports/kpi';
 
     const menuItems = [
         {
@@ -259,6 +261,9 @@ const MainLayout = ({ children }) => {
                 collapsible
                 collapsed={collapsed}
                 width={250}
+                breakpoint="md"
+                collapsedWidth={0}
+                onBreakpoint={(broken) => setCollapsed(broken)}
                 style={{
                     background: '#214F73',
                     boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
@@ -341,8 +346,8 @@ const MainLayout = ({ children }) => {
                 </Header>
                 <Content
                     style={{
-                        margin: isTariffAi ? 0 : '24px 16px',
-                        padding: isTariffAi ? 0 : 24,
+                        margin: isTariffAi || isBtb || isKpiReport ? 0 : '24px 16px',
+                        padding: isTariffAi || isBtb || isKpiReport ? 0 : 24,
                         minHeight: 280,
                         overflowY: isTariffAi ? 'hidden' : 'auto',
                         flex: 1,

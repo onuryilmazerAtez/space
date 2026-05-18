@@ -14,7 +14,7 @@ import {
     DeleteOutlined, EditOutlined, SearchOutlined, FolderOpenOutlined,
     BarChartOutlined, ShopOutlined, PercentageOutlined, RobotOutlined,
     SettingOutlined, ArrowLeftOutlined,
-    TeamOutlined, TrophyOutlined, ClockCircleOutlined, WarningOutlined,
+    TeamOutlined, ClockCircleOutlined,
     CloseOutlined, EyeOutlined, ExclamationCircleOutlined,
     LineChartOutlined, ShoppingCartOutlined, PieChartOutlined,
     ApiOutlined, LinkOutlined, FormOutlined,
@@ -2236,6 +2236,7 @@ export default function ReportsPage() {
         { key: 'vergi', label: 'Toplu TR Vergi Sorgulama', color: '#faad14' },
         { key: 'karsilastirma', label: 'GTİP Karşılaştırma & Ülke Vergi', color: '#722ed1' },
         { key: 'musteri', label: 'Firma Bazlı Eşya Raporu', color: '#52c41a' },
+        { key: 'yonetici', label: 'Yönetici Performans Raporu', color: '#1677ff' },
     ];
 
     const reportListCols = [
@@ -2337,18 +2338,6 @@ export default function ReportsPage() {
     const mainTabs = [
         { key: 'create', label: <span><FormOutlined /> Rapor Oluştur</span>, children: renderCreateReport() },
         { key: 'myreports', label: <span><FolderOpenOutlined /> Raporlarım</span>, children: renderReportList(generatedReports) },
-        {
-            key: 'yonetici',
-            label: <span><TrophyOutlined /> Yönetici Raporu</span>,
-            children: (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
-                    <Button type="primary" size="large" icon={<TrophyOutlined />} onClick={() => navigate('/reports/kpi')}
-                        style={{ borderRadius: 8, fontWeight: 600 }}>
-                        Yönetici Performans Raporu'nu Aç
-                    </Button>
-                </div>
-            ),
-        },
     ];
 
     const hideTabBar = searchParams.has('tab') || searchParams.has('report');
@@ -2360,7 +2349,7 @@ export default function ReportsPage() {
             ) : (
                 <Tabs
                     activeKey={activeTab}
-                    onChange={(key) => { if (key === 'yonetici') { navigate('/reports/kpi'); } else { setActiveTab(key); } }}
+                    onChange={(key) => setActiveTab(key)}
                     items={mainTabs}
                     size="large"
                     tabBarStyle={{ marginBottom: 24, background: 'white', padding: '0 20px', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
