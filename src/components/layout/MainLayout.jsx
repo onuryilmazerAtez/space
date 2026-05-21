@@ -254,7 +254,7 @@ const MainLayout = ({ children }) => {
     };
 
     return (
-        <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
+        <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden', '--sidebar-w': collapsed ? '0px' : '250px' }}>
             <style>{sidebarAnimationStyles}</style>
             <Sider
                 trigger={null}

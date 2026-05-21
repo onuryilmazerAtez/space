@@ -774,7 +774,7 @@ const GtipKarsilastirmaReport = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <Card 
                     title="Görsel Vergi Karşılaştırması (Toplam Vergi Tutarı)" 
-                    style={{ borderRadius: 12 }}
+                    style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none' }}
                     extra={
                         <Segmented 
                             options={[
@@ -817,7 +817,7 @@ const GtipKarsilastirmaReport = () => {
                     </div>
                 </Card>
 
-                <Card title="Detaylı Karşılaştırma Tablosu" style={{ borderRadius: 12 }}>
+                <Card title="Detaylı Karşılaştırma Tablosu" style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none' }}>
                     <Table 
                         size="middle" 
                         pagination={false} 
@@ -885,7 +885,7 @@ const GtipKarsilastirmaReport = () => {
 
         return (
             <Card 
-                style={{ borderRadius: 12, marginTop: 12 }}
+                style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none', marginTop: 12 }}
                 extra={
                     <Button 
                         type="default" 
@@ -934,7 +934,7 @@ const GtipKarsilastirmaReport = () => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* Global Excel Upload Area */}
-            <Card style={{ borderRadius: 12, border: '2px dashed #e8e8e8', background: '#fafafa' }} styles={{ body: { padding: 32, textAlign: 'center' } }}>
+            <Card style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none', background: '#fafafa' }} styles={{ body: { padding: 32, textAlign: 'center' } }}>
                 <CloudUploadOutlined style={{ fontSize: 48, color: '#bfbfbf', marginBottom: 12 }} />
                 <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 8 }}>Global Veri Yükleme (Excel)</div>
                 <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
@@ -2002,7 +2002,7 @@ export default function ReportsPage() {
                 }
                 if (r.id === 'vergi') return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        <Card style={{ borderRadius: 12, border: '2px dashed #e8e8e8', background: '#fafafa' }} styles={{ body: { padding: 32, textAlign: 'center' } }}>
+                        <Card style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none', background: '#fafafa' }} styles={{ body: { padding: 32, textAlign: 'center' } }}>
                             <DownloadOutlined style={{ fontSize: 40, color: COLORS.primary, marginBottom: 12 }} />
                             <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 8 }}>GTİP Excel Şablonunu İndirin</div>
                             <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>TR GTİP, Eşya Kodu ve Eşya Tanımı sütunlarını doldurun, ardından yükleyin.</Text>
@@ -2013,7 +2013,7 @@ export default function ReportsPage() {
                         </Card>
 
                         {!vergiExcelUploaded ? (
-                            <Card style={{ borderRadius: 12, minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Card style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none', minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <div style={{ textAlign: 'center', padding: '40px' }}>
                                     <FileExcelOutlined style={{ fontSize: 56, color: '#d9d9d9', marginBottom: 20 }} />
                                     <Title level={4} style={{ color: '#8c8c8c', marginBottom: 8 }}>Vergi Sorgulaması İçin Excel Yükleyin</Title>
@@ -2023,7 +2023,7 @@ export default function ReportsPage() {
                                 </div>
                             </Card>
                         ) : (
-                            <Card title="Vergi Sorgulama Sonuçları" style={{ borderRadius: 12 }}>
+                            <Card title="Vergi Sorgulama Sonuçları" style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none' }}>
                                 <Table
                                     size="middle"
                                     pagination={false}
@@ -2121,7 +2121,7 @@ export default function ReportsPage() {
 
                 return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        <Card size="small" style={{ borderRadius: 10 }}>
+                        <Card size="small" style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none' }}>
                             <Space wrap>
                                 <Select
                                     placeholder="Firma Seçin"
@@ -2141,7 +2141,7 @@ export default function ReportsPage() {
                         </Card>
 
                         {!firmaRaporFiltered ? (
-                            <Card style={{ borderRadius: 12, minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Card style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none', minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <div style={{ textAlign: 'center', padding: '40px' }}>
                                     <ShopOutlined style={{ fontSize: 56, color: '#d9d9d9', marginBottom: 20 }} />
                                     <Title level={4} style={{ color: '#8c8c8c', marginBottom: 8 }}>Eşya Listesi İçin Filtre Uygulayın</Title>
@@ -2151,7 +2151,7 @@ export default function ReportsPage() {
                                 </div>
                             </Card>
                         ) : (
-                            <Card style={{ borderRadius: 12 }}>
+                            <Card style={{ borderRadius: 6, border: '1px solid #e5e7eb', boxShadow: 'none' }}>
                                 <Table
                                     size="middle"
                                     pagination={{ pageSize: 10 }}
@@ -2167,37 +2167,72 @@ export default function ReportsPage() {
             })();
 
             return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <Button icon={<ArrowLeftOutlined />} onClick={() => { navigate('/rapor-deneme'); }} type="text" size="large" />
-                        <div style={{ flex: 1 }}>
-                            <Title level={4} style={{ margin: 0 }}>{r.title}</Title>
-                            <Text type="secondary">{r.desc}</Text>
+                <div style={{ marginTop: -24, marginLeft: -24, marginRight: -24 }}>
+                    {/* Fixed full-width page header — spans from sidebar to right edge */}
+                    <div style={{
+                        position: 'fixed',
+                        top: 64,          /* below the app header */
+                        left: 'var(--sidebar-w, 250px)',
+                        right: 0,
+                        zIndex: 98,       /* below app header (99) but above content */
+                        background: '#fff',
+                        borderBottom: '1px solid #e5e7eb',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                    }}>
+                        <div style={{ padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                            {/* Left: back button + title */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <button
+                                    onClick={() => { navigate('/rapor-deneme'); }}
+                                    style={{ width: 32, height: 32, border: '1px solid #e5e7eb', borderRadius: 6, background: '#fff', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', flexShrink: 0 }}
+                                >
+                                    <ArrowLeftOutlined style={{ fontSize: 14 }} />
+                                </button>
+                                <div>
+                                    <Title level={3} style={{ margin: 0, fontWeight: 700, fontSize: 22 }}>{r.title}</Title>
+                                    <Text type="secondary" style={{ fontSize: 13, fontWeight: 400 }}>{r.desc}</Text>
+                                </div>
+                            </div>
+                            {/* Right: save + download */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                                <Input
+                                    placeholder="Rapor Adı Giriniz..."
+                                    style={{ width: 200, borderRadius: 6, fontSize: 13 }}
+                                    value={reportTitle}
+                                    onChange={e => setReportTitle(e.target.value)}
+                                    onPressEnter={() => { handleSaveHazirReport(r.id, reportTitle || r.title); setReportTitle(''); }}
+                                />
+                                <Button
+                                    type="primary"
+                                    style={{ background: '#2563EB', borderColor: '#2563EB', borderRadius: 6, fontWeight: 400 }}
+                                    onClick={() => {
+                                        handleSaveHazirReport(r.id, reportTitle || r.title);
+                                        setReportTitle('');
+                                    }}
+                                >
+                                    Kaydet
+                                </Button>
+                                <Button
+                                    icon={<DownloadOutlined />}
+                                    style={{ borderRadius: 6, fontWeight: 400, color: '#374151' }}
+                                    onClick={() => message.success('Rapor Excel olarak indirildi')}
+                                >
+                                    Excel
+                                </Button>
+                            </div>
                         </div>
-                        <Space wrap>
-                            <Input 
-                                placeholder="Rapor Adı giriniz..." 
-                                style={{ width: 220 }} 
-                                value={reportTitle} 
-                                onChange={e => setReportTitle(e.target.value)}
-                                prefix={<EditOutlined style={{ color: 'rgba(0,0,0,0.25)' }} />}
-                            />
-                            <Button 
-                                icon={<SaveOutlined />} 
-                                type="primary" 
-                                onClick={() => {
-                                    handleSaveHazirReport(r.id, reportTitle || r.title);
-                                    setReportTitle('');
-                                }}
-                            >
-                                Kaydet
-                            </Button>
-                            <Button icon={<DownloadOutlined />} onClick={() => message.success('Rapor Excel olarak indirildi')}>İndir</Button>
-                        </Space>
                     </div>
-                    {detailBody}
+                    {/* Spacer so content starts below the fixed header (~72px header height) */}
+                    <div style={{ height: 73 }} />
+                    {/* Page body — fixed max-width, centered */}
+                    <div style={{ padding: '24px 32px' }}>
+                        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                            {detailBody}
+                        </div>
+                    </div>
                 </div>
             );
+
         }
 
 // ── Hazır Raporlar ───────────────────────────────────

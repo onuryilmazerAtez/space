@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Card, Typography, Button, Table, Input, DatePicker, Select, message, Tooltip } from 'antd';
+import { Card, Typography, Button, Table, DatePicker, Select, Tooltip } from 'antd';
 import {
     ArrowLeftOutlined,
     TableOutlined, DownloadOutlined,
@@ -204,7 +204,6 @@ function FirmaTable({ data }) {
 export default function KpiReportPage() {
     const navigate = useNavigate();
     const [period, setPeriod]             = useState('gunluk');
-    const [reportName, setReportName]     = useState('');
     const [dateRange, setDateRange]       = useState(null);
     const [kpiPeriod, setKpiPeriod]       = useState('gunluk');
     const [kpiDateRange, setKpiDateRange] = useState(null);
@@ -212,15 +211,12 @@ export default function KpiReportPage() {
     const [kpiFirma, setKpiFirma]         = useState('__all__');
     const [kpiUlke, setKpiUlke]           = useState('__all__');
     const [kpiHizmet, setKpiHizmet]       = useState('__all__');
-    const [lastRefreshed, setLastRefreshed]         = useState(null);
-    const [advisorLastRefreshed, setAdvisorLastRefreshed] = useState(null);
+    const [refreshKey, setRefreshKey]     = useState(0);
+    const [lastRefreshed, setLastRefreshed] = useState(null);
 
-    const handleKpiRefresh = () => {
+    const handleRefresh = () => {
+        setRefreshKey(k => k + 1);
         setLastRefreshed(new Date());
-    };
-
-    const handleAdvisorRefresh = () => {
-        setAdvisorLastRefreshed(new Date());
     };
 
     // Filtered KPI segments: Firma/Hizmet filters affect all EXCEPT "Aktif Müşavir"
@@ -243,27 +239,6 @@ export default function KpiReportPage() {
         { key: 'aylik',  label: 'Aylık',               icon: <ScheduleOutlined />   },
         { key: 'ozel',   label: 'Belirli Tarih Aralığı', icon: <FieldTimeOutlined /> },
     ];
-
-    const handleSave = () => {
-        if (!reportName.trim()) {
-            message.warning('Lütfen rapor adı girin.');
-            return;
-        }
-        const newReport = {
-            id: Date.now().toString(),
-            title: reportName.trim(),
-            category: 'yonetici',
-            date: new Date().toISOString(),
-            createdBy: 'Yönetici',
-            items: [],
-        };
-        try {
-            const existing = JSON.parse(localStorage.getItem('space_generated_reports') || '[]');
-            localStorage.setItem('space_generated_reports', JSON.stringify([newReport, ...existing]));
-        } catch (e) { /* ignore */ }
-        message.success(`"${reportName}" raporu kaydedildi.`);
-        setReportName('');
-    };
 
     // Period değişince genişletilmiş satırları sıfırla
     const handlePeriodChange = (key) => {
@@ -353,20 +328,18 @@ export default function KpiReportPage() {
                             <ArrowLeftOutlined style={{ fontSize: 14 }} />
                         </button>
                         <div>
-                            <Title level={3} style={{ margin: 0, fontWeight: 700, fontSize: 22 }}>Yönetici Performans Raporu</Title>
+                            <Title level={3} style={{ margin: 0, fontWeight: 700, fontSize: 22 }}>Performans Raporu</Title>
                             <Text type="secondary" style={{ fontSize: 13, fontWeight: 400 }}>Müşavir bazlı eşya işlem performansını takip edin</Text>
                         </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <Input
-                            placeholder="Rapor Adı Giriniz..."
-                            value={reportName}
-                            onChange={e => setReportName(e.target.value)}
-                            onPressEnter={handleSave}
-                            style={{ width: 200, borderRadius: 6, fontSize: 13 }}
-                        />
-                        <Button type="primary" onClick={handleSave} style={{ background: PRIMARY, borderColor: PRIMARY, borderRadius: 6, fontWeight: 400 }}>
-                            Kaydet
+                        {lastRefreshed && (
+                            <span style={{ fontSize: 12, color: '#9ca3af' }}>
+                                Son yenilenme: {lastRefreshed.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            </span>
+                        )}
+                        <Button icon={<ReloadOutlined />} onClick={handleRefresh} style={{ borderRadius: 6, fontWeight: 400, color: '#374151' }}>
+                            Yenile
                         </Button>
                         <Button icon={<DownloadOutlined />} style={{ borderRadius: 6, fontWeight: 400, color: '#374151' }}>
                             Excel
@@ -382,21 +355,6 @@ export default function KpiReportPage() {
                 {/* Header row */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid #e5e7eb' }}>
                     <span style={{ fontSize: 15, fontWeight: 600, color: '#111827', letterSpacing: '-0.01em' }}>Performans Özeti</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        {lastRefreshed && (
-                            <span style={{ fontSize: 12, color: '#9ca3af' }}>
-                                Son güncelleme: {lastRefreshed.toLocaleTimeString('tr-TR')}
-                            </span>
-                        )}
-                        <Button
-                            icon={<ReloadOutlined />}
-                            size="small"
-                            onClick={handleKpiRefresh}
-                            style={{ borderRadius: 6, color: '#6b7280', borderColor: '#e5e7eb' }}
-                        >
-                            Yenile
-                        </Button>
-                    </div>
                 </div>
 
                 {/* Filter row */}
@@ -486,19 +444,6 @@ export default function KpiReportPage() {
                             <RangePicker value={dateRange} onChange={setDateRange} format="DD.MM.YYYY" style={{ borderRadius: 6 }} />
                         )}
                         <div style={{ width: 1, height: 24, background: '#e5e7eb', flexShrink: 0 }} />
-                        {advisorLastRefreshed && (
-                            <span style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap' }}>
-                                Son güncelleme: {advisorLastRefreshed.toLocaleTimeString('tr-TR')}
-                            </span>
-                        )}
-                        <Button
-                            icon={<ReloadOutlined />}
-                            size="small"
-                            onClick={handleAdvisorRefresh}
-                            style={{ borderRadius: 6, color: '#6b7280', borderColor: '#e5e7eb' }}
-                        >
-                            Yenile
-                        </Button>
                     </div>
                 </div>
                 <Table

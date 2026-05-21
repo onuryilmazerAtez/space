@@ -96,6 +96,7 @@ const REPORT_CARDS = [
     title: "Toplu TR Vergi Sorgulama",
     desc: "GTİP şablonunu indirin, doldurun, yükleyin — sistem vergileri otomatik sorgular.",
     route: "/reports?report=vergi",
+    disabled: true,
   },
   {
     category: "Karşılaştırma",
@@ -103,6 +104,7 @@ const REPORT_CARDS = [
     title: "GTİP Karşılaştırma & Ülke Vergi",
     desc: "Türkiye GTİP'lerini seçtiğiniz ülkenin GTİP karşılıklarıyla karşılaştırın.",
     route: "/reports?report=gtip",
+    disabled: true,
   },
   {
     category: "Müşteri",
@@ -110,6 +112,7 @@ const REPORT_CARDS = [
     title: "Firma Bazlı Eşya Raporu",
     desc: "Firmaya ait eşya kataloğunu toplu görüntüleyin, filtreleyin ve Excel'e aktarın.",
     route: "/reports?report=firma",
+    disabled: true,
   },
 ];
 
@@ -189,8 +192,17 @@ function AntCard({ children, style: extra, hoverable }) {
 /* ─── Rapor kartı ─── */
 function ReportCard({ card }) {
   const navigate = useNavigate();
+  const isDisabled = card.disabled === true;
+
   return (
-    <AntCard hoverable style={{ overflow: "hidden" }}>
+    <AntCard
+      hoverable={!isDisabled}
+      style={{
+        overflow: "hidden",
+        opacity: isDisabled ? 0.65 : 1,
+        cursor: isDisabled ? "not-allowed" : "pointer",
+      }}
+    >
       <div style={{ display: "flex", alignItems: "stretch", minHeight: 108 }}>
         {/* İkon alanı */}
         <div style={{
@@ -211,6 +223,30 @@ function ReportCard({ card }) {
           justifyContent: "space-between",
         }}>
           <div>
+            {/* Yakında etiketi */}
+            {isDisabled && (
+              <div style={{
+                display: "inline-flex", alignItems: "center",
+                gap: 4, marginBottom: 6,
+                background: "#fff7e6",
+                border: "1px solid #ffd591",
+                borderRadius: 4,
+                padding: "0 7px",
+                height: 20,
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#d46b08",
+                fontFamily: token.fontFamily,
+                letterSpacing: 0.3,
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Yakında
+              </div>
+            )}
             <div style={{
               fontSize: token.fontSizeLG,
               fontWeight: token.fontWeightStrong,
@@ -232,7 +268,12 @@ function ReportCard({ card }) {
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: token.paddingSM }}>
-            <AntButton type="primary" size="large" onClick={() => navigate(card.route)}>
+            <AntButton
+              type="primary"
+              size="large"
+              style={isDisabled ? { pointerEvents: "none", opacity: 0.5 } : {}}
+              onClick={isDisabled ? undefined : () => navigate(card.route)}
+            >
               {'Oluştur'} <ArrowRight />
             </AntButton>
           </div>
@@ -248,6 +289,36 @@ function Sidebar() {
 
   return (
     <aside style={{ display: "flex", flexDirection: "column", gap: token.marginLG }}>
+
+      {/* Performans Raporu CTA — üstte */}
+      <AntCard style={{ padding: token.paddingLG, background: "linear-gradient(135deg, #1677ff 0%, #7B2FBE 100%)", border: "none" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+            <path d="M4 22h16"/>
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
+          </svg>
+          <div style={{
+            fontSize: token.fontSizeLG, fontWeight: token.fontWeightStrong,
+            color: "#fff", fontFamily: token.fontFamily,
+          }}>
+            Performans Raporu
+          </div>
+        </div>
+        <div style={{
+          fontSize: token.fontSizeSM, color: "rgba(255,255,255,0.75)",
+          lineHeight: token.lineHeight, marginBottom: token.margin,
+          fontFamily: token.fontFamily,
+        }}>
+          Üst düzey yönetim için kritik performans ve maliyet metrikleri.
+        </div>
+        <AntButton style={{ background: "#fff", color: token.colorPrimary, borderColor: "#fff" }} onClick={() => navigate("/reports/kpi")}>
+          Görüntüle
+        </AntButton>
+      </AntCard>
 
       {/* Raporlar Modülü — Ant Design tarzı kart */}
       <AntCard style={{ padding: 0, overflow: "hidden", boxShadow: "none" }}>
@@ -364,36 +435,6 @@ function Sidebar() {
             )}
           </div>
         ))}
-      </AntCard>
-
-      {/* Yönetici Raporu CTA */}
-      <AntCard style={{ padding: token.paddingLG, background: "linear-gradient(135deg, #1677ff 0%, #7B2FBE 100%)", border: "none" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
-            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-            <path d="M4 22h16"/>
-            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-            <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
-          </svg>
-          <div style={{
-            fontSize: token.fontSizeLG, fontWeight: token.fontWeightStrong,
-            color: "#fff", fontFamily: token.fontFamily,
-          }}>
-            Yönetici Raporları
-          </div>
-        </div>
-        <div style={{
-          fontSize: token.fontSizeSM, color: "rgba(255,255,255,0.75)",
-          lineHeight: token.lineHeight, marginBottom: token.margin,
-          fontFamily: token.fontFamily,
-        }}>
-          Üst düzey yönetim için kritik performans ve maliyet metrikleri.
-        </div>
-        <AntButton style={{ background: "#fff", color: token.colorPrimary, borderColor: "#fff" }} onClick={() => navigate("/reports/kpi")}>
-          + Oluştur
-        </AntButton>
       </AntCard>
     </aside>
   );
