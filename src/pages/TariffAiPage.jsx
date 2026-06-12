@@ -128,6 +128,25 @@ const TurkeyFlag = () => (
         <path d="M12.5 5.5l1.2 3.5-3-2.2h3.7l-3 2.2z" fill="white" />
     </svg>
 );
+const PremiumPackIcon = ({ size = 16 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="4" fill="url(#premiumPackGrad)"/>
+        <g clipPath="url(#premiumPackClip)">
+            <rect width="16" height="16" transform="translate(4 4)" fill="white" fillOpacity="0.01"/>
+            <path d="M18.9213 7.791L15.4463 9.93207L12.1141 5.48743C12.1007 5.46954 12.0833 5.45502 12.0633 5.44502C12.0433 5.43502 12.0213 5.42981 11.9989 5.42981C11.9766 5.42981 11.9545 5.43502 11.9345 5.44502C11.9146 5.45502 11.8972 5.46954 11.8838 5.48743L8.5534 9.93207L5.07662 7.791C4.97483 7.7285 4.84269 7.81243 4.85876 7.93207L6.22304 18.2999C6.24269 18.441 6.36412 18.5499 6.50876 18.5499H17.4927C17.6355 18.5499 17.7588 18.4428 17.7766 18.2999L19.1409 7.93207C19.1552 7.81243 19.0248 7.7285 18.9213 7.791ZM16.6713 17.3285H7.32662L6.3659 10.0178L8.86233 11.5553L11.9998 7.36957L15.1373 11.5553L17.6338 10.0178L16.6713 17.3285ZM11.9998 11.9428C10.8909 11.9428 9.98912 12.8446 9.98912 13.9535C9.98912 15.0624 10.8909 15.9642 11.9998 15.9642C13.1088 15.9642 14.0105 15.0624 14.0105 13.9535C14.0105 12.8446 13.1088 11.9428 11.9998 11.9428ZM11.9998 14.816C11.5248 14.816 11.1391 14.4303 11.1391 13.9535C11.1391 13.4785 11.5248 13.091 11.9998 13.091C12.4748 13.091 12.8605 13.4767 12.8605 13.9535C12.8605 14.4285 12.4748 14.816 11.9998 14.816Z" fill="white"/>
+        </g>
+        <defs>
+            <linearGradient id="premiumPackGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#FE9A00"/>
+                <stop offset="1" stopColor="#FF6900"/>
+            </linearGradient>
+            <clipPath id="premiumPackClip">
+                <rect width="16" height="16" fill="white" transform="translate(4 4)"/>
+            </clipPath>
+        </defs>
+    </svg>
+);
+
 const CollapseIcon = ({ flipped }) => (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ transform: flipped ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>
         <path d="M11 4L6 9L11 14" stroke="#5f6368" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
@@ -374,30 +393,10 @@ function getAiResponse(text) {
 /* ThinkingBlock and LiveThinking replaced by AIActionIndicator */
 
 /* ── Chat sidebar ─────────────────────────────────────────── */
-const TOOL_BADGE = {
-    classify: { bg: "#ede9fe", stroke: "#7c3aed" },
-    tax:      { bg: "#dcfce7", stroke: "#16a34a" },
-    default:  { bg: "#dbeafe", stroke: "#2563eb" },
-};
 
-function ToolBadgeIcon({ toolId }) {
-    const c = TOOL_BADGE[toolId] || TOOL_BADGE.default;
-    return (
-        <div style={{ width: 22, height: 22, borderRadius: 6, background: c.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={c.stroke} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                {toolId === "tax"
-                    ? <><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 11h4M9 14h6"/></>
-                    : toolId === "classify"
-                    ? <><path d="M6 6h7l2 2h3v10H6V6z"/><path d="M10 15l2.5 2.5L18 11"/></>
-                    : <><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3"/></>
-                }
-            </svg>
-        </div>
-    );
-}
-
-function ChatSidebar({ collapsed, sessions, activeId, onNew, onSelect, userCredits, totalCredits, reservedCredits = 0, chatCreditsUsed = 0, lockedSessionIds = new Set(), packageName = "Kullanım" }) {
+function ChatSidebar({ collapsed, sessions, onNew, onSelect, userCredits, totalCredits, reservedCredits = 0, chatCreditsUsed = 0, lockedSessionIds = new Set(), packageName = "Kullanım" }) {
     const [searchQuery, setSearchQuery] = useState("");
+    const [hoveredSessionId, setHoveredSessionId] = useState(null);
     const usedCredits = totalCredits - userCredits;
     const usagePct = totalCredits > 0 ? Math.min(100, (usedCredits / totalCredits) * 100) : 0;
     const barColor = usagePct >= 100 ? "#ef4444" : "#1a73e8";
@@ -411,7 +410,7 @@ function ChatSidebar({ collapsed, sessions, activeId, onNew, onSelect, userCredi
     );
 
     return (
-        <div style={{ width: collapsed ? 0 : 260, minWidth: collapsed ? 0 : 260, height: "100%", background: "#f1f3f4", borderRight: collapsed ? "none" : "1px solid #e0e0e0", display: "flex", flexDirection: "column", overflow: "hidden", transition: "width 0.3s, min-width 0.3s", flexShrink: 0 }}>
+        <div style={{ width: collapsed ? 0 : 260, minWidth: collapsed ? 0 : 260, height: "100%", background: "#ffffff", borderRight: collapsed ? "none" : "1px solid #e0e0e0", display: "flex", flexDirection: "column", overflow: "hidden", transition: "width 0.3s, min-width 0.3s", flexShrink: 0 }}>
             {!collapsed && (
                 <>
                     {/* Header row */}
@@ -432,12 +431,12 @@ function ChatSidebar({ collapsed, sessions, activeId, onNew, onSelect, userCredi
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
                         <span style={{ fontSize: 13, fontWeight: 500, color: "#374151", fontFamily: ds.fonts.family }}>Sohbetler</span>
-                        <span style={{ fontSize: 11, color: "#6b7280", background: "#e5e7eb", borderRadius: 10, padding: "1px 7px", fontFamily: ds.fonts.family }}>{sessions.length}</span>
+                        <span style={{ fontSize: 11, color: "#6b7280", background: "#f0f0f0", borderRadius: 10, padding: "1px 7px", fontFamily: ds.fonts.family }}>{sessions.length}</span>
                     </div>
 
                     {/* Search */}
                     <div style={{ padding: "0 10px 8px" }}>
-                        <div style={{ display: "flex", alignItems: "center", background: "#fff", borderRadius: 8, border: "1px solid #e5e7eb", padding: "6px 10px", gap: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", background: "#f5f5f5", borderRadius: 8, border: "1px solid #f0f0f0", padding: "6px 10px", gap: 6 }}>
                             <input
                                 type="text"
                                 placeholder="Ara"
@@ -461,38 +460,56 @@ function ChatSidebar({ collapsed, sessions, activeId, onNew, onSelect, userCredi
                         )}
                         {filtered.map(s => {
                             const isLocked = lockedSessionIds.has(s.id);
+                            const isHovered = hoveredSessionId === s.id;
                             return (
-                                <button
+                                <div
                                     key={s.id}
                                     onClick={() => onSelect(s.id)}
-                                    style={{ width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 6, padding: "7px 8px", borderRadius: 8, background: activeId === s.id ? "#e8f0fe" : "transparent", border: "none", cursor: "pointer", fontFamily: ds.fonts.family, marginBottom: 1, transition: "background 0.13s", position: "relative" }}
-                                    onMouseEnter={e => { if (activeId !== s.id) e.currentTarget.style.background = "rgba(0,0,0,0.04)"; }}
-                                    onMouseLeave={e => { if (activeId !== s.id) e.currentTarget.style.background = "transparent"; }}
+                                    style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 8px", borderRadius: 8, background: isHovered ? "#fafafa" : "transparent", cursor: "pointer", fontFamily: ds.fonts.family, marginBottom: 2, transition: "background 0.13s" }}
+                                    onMouseEnter={() => setHoveredSessionId(s.id)}
+                                    onMouseLeave={() => setHoveredSessionId(null)}
                                 >
-                                    {isLocked && (
-                                        <span style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    {/* Title */}
+                                    <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 14, fontWeight: 400, lineHeight: "20px", color: isLocked ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.85)" }}>
+                                        {s.title}
+                                    </span>
+
+                                    {/* Badges */}
+                                    <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                                        {/* Lock badge */}
+                                        <div style={{ width: 24, height: 24, borderRadius: 6, background: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isLocked ? "#595959" : "#bfbfbf"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                                             </svg>
-                                        </span>
-                                    )}
-                                    <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 13, color: isLocked ? "#9ca3af" : activeId === s.id ? ds.colors.primary : ds.colors.text }}>{s.title}</span>
-                                    <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
-                                        <div style={{ width: 22, height: 22, borderRadius: 6, background: "#ede9fe", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                        </div>
+
+                                        {/* Tag badge (purple) */}
+                                        <div style={{ width: 24, height: 24, borderRadius: 6, background: "#efdbff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                                                <path d="M7.342 1.508A1.167 1.167 0 0 0 6.517 1.167H2.333a1.167 1.167 0 0 0-1.166 1.166V6.517c0 .31.123.606.341.825L6.586 12.42a1.167 1.167 0 0 0 1.749 0l3.833-3.833a1.167 1.167 0 0 0 0-1.75L7.342 1.508Z" stroke="#531DAB" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <circle cx="4.375" cy="4.375" r="0.583" fill="#531DAB"/>
                                             </svg>
                                         </div>
-                                        <ToolBadgeIcon toolId={s.toolId} />
+
+                                        {/* Hover: "..." more button */}
+                                        {isHovered && (
+                                            <div style={{ width: 24, height: 24, borderRadius: 6, background: "#ffffff", border: "1px solid #d9d9d9", boxShadow: "0px 2px 0px 0px rgba(0,0,0,0.04)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                                    <circle cx="5" cy="12" r="1.5" fill="rgba(0,0,0,0.85)"/>
+                                                    <circle cx="12" cy="12" r="1.5" fill="rgba(0,0,0,0.85)"/>
+                                                    <circle cx="19" cy="12" r="1.5" fill="rgba(0,0,0,0.85)"/>
+                                                </svg>
+                                            </div>
+                                        )}
                                     </div>
-                                </button>
+                                </div>
                             );
                         })}
                     </div>
 
                     {/* Footer */}
-                    <div style={{ padding: "8px 8px 12px", borderTop: "1px solid #e0e0e0" }}>
+                    <div style={{ padding: "8px 8px 12px", borderTop: "1px solid #f0f0f0" }}>
                         {[
                             { label: "Neler Yapabilirim?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="#6b7280" stroke="none"/></svg> },
                             { label: "Sıkça Sorulan Sorular", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="0.5" fill="#6b7280"/></svg> },
@@ -509,14 +526,7 @@ function ChatSidebar({ collapsed, sessions, activeId, onNew, onSelect, userCredi
                         {/* Usage bar with reserved segment */}
                         <div style={{ padding: "6px 8px 0" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-                                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-                                    <path d="M4 22h16" />
-                                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-                                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-                                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-                                </svg>
+                                <PremiumPackIcon size={16} />
                                 <span style={{ fontSize: 13, color: "#374151", fontFamily: ds.fonts.family, flex: 1 }}>{packageName}</span>
                                 <span style={{ fontSize: 11, color: "#6b7280", fontFamily: ds.fonts.family }}>{usedCredits}/{totalCredits}</span>
                             </div>
@@ -727,17 +737,18 @@ const CREDITS_PER_CHAT = 50;
 const PACKAGE_NAME = "Premium Plus Pack";
 
 
-function ChatLimitWarningBanner({ remaining, onNewChat }) {
+function ChatLimitWarningBanner({ remaining, onNewChat, onBuyCredits }) {
     return (
         <div style={{
             background: "linear-gradient(90deg, #fffbe6, #fff7cc)",
             border: "1px solid #ffe58f",
-            borderRadius: 6, padding: "16px 24px",
+            borderRadius: 6, padding: "12px 16px",
             animation: "bannerSlideUp 0.35s cubic-bezier(0.22,1,0.36,1) both",
             overflow: "hidden",
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
         }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
                     <path d="M12 2L2 20h20L12 2z" fill="#faad14" />
                     <path d="M12 9v5" stroke="white" strokeWidth="2" strokeLinecap="round" />
                     <circle cx="12" cy="17" r="1" fill="white" />
@@ -746,6 +757,19 @@ function ChatLimitWarningBanner({ remaining, onNewChat }) {
                     Bu sohbet sona yaklaşıyor
                 </span>
             </div>
+            <button
+                onClick={onBuyCredits}
+                style={{
+                    background: "#faad14", color: "white", border: "none",
+                    borderRadius: 6, padding: "5px 13px", fontSize: 12, fontWeight: 500,
+                    cursor: "pointer", fontFamily: ds.fonts.family, whiteSpace: "nowrap",
+                    transition: "opacity 0.15s", flexShrink: 0,
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+            >
+                Ek Paket Satın Alın
+            </button>
         </div>
     );
 }
@@ -810,177 +834,99 @@ function ChatLockedCard({ onNewChat, canStart, onBuyCredits }) {
     );
 }
 
-const PACKAGES = [
-    {
-        id: "premium",
-        name: "Premium Pack",
-        price: "€79",
-        priceSub: ".90",
-        priceNote: "/month",
-        iconBg: "linear-gradient(135deg, #FF8C00, #FFA040)",
-        recommended: true,
-        crown: true,
-        features: [
-            "HS Code Search & Lookup",
-            "Advanced Duty & Tax Calculation",
-            "Country-Specific Tariff Data (TR-EU-CH-UK)",
-            "Country of Origin Impact (TR)",
-            "Advanced Query Results",
-            "Priority Email Support",
-            "AI Assistant for Tariff Classification",
-            "AI Assistant for Compliance Requirements",
-            "AI Assistant for Duty & Tax Optimization",
-            "AI Assistant for Scenario Comparison",
-        ],
-        buttonDark: true,
-    },
-    {
-        id: "premium_plus",
-        name: "Premium Plus Pack",
-        price: "€159",
-        priceSub: ".90",
-        priceNote: "/month",
-        iconBg: "linear-gradient(135deg, #7B2FBE, #9C40D4)",
-        recommended: false,
-        crown: false,
-        features: [
-            "HS Code Search & Lookup",
-            "Advanced Duty & Tax Calculation",
-            "Country-Specific Tariff Data (TR-EU-CH-UK)",
-            "Country of Origin Impact (TR)",
-            "Advanced Query Results",
-            "Priority Email Support",
-            "AI Assistant for Tariff Classification",
-            "AI Assistant for Compliance Requirements",
-            "AI Assistant for Duty & Tax Optimization",
-            "AI Assistant for Scenario Comparison",
-        ],
-        buttonDark: false,
-    },
+/* ── Ek kredi paketleri (görseldeki tasarım) ─────────────── */
+const CREDIT_PACKAGES = [
+    { id: "c5",   credits: 5,   pricePerCredit: "€0.98", total: "€4.90" },
+    { id: "c10",  credits: 10,  pricePerCredit: "€0.89", total: "€8.90" },
+    { id: "c25",  credits: 25,  pricePerCredit: "€0.80", total: "€19.90" },
+    { id: "c50",  credits: 50,  pricePerCredit: "€0.70", total: "€34.90" },
+    { id: "c100", credits: 100, pricePerCredit: "€0.60", total: "€59.90" },
 ];
 
 function TokenExhaustedChatCard({ onBuyCredits }) {
-    const [expandedPkg, setExpandedPkg] = useState(null);
-    const FEATURES_SHOWN = 4;
-
-    const PkgIconPremium = () => (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g clipPath="url(#pp-clip)">
-                <rect width="24" height="24" fill="white" fillOpacity="0.01"/>
-                <path d="M22.3819 5.6865L17.1694 8.89811L12.1712 2.23114C12.1511 2.20431 12.125 2.18253 12.095 2.16753C12.065 2.15253 12.0319 2.14471 11.9984 2.14471C11.9649 2.14471 11.9318 2.15253 11.9018 2.16753C11.8718 2.18253 11.8457 2.20431 11.8256 2.23114L6.8301 8.89811L1.61492 5.6865C1.46225 5.59275 1.26403 5.71864 1.28814 5.89811L3.33457 21.4499C3.36403 21.6615 3.54617 21.8249 3.76314 21.8249H20.239C20.4533 21.8249 20.6381 21.6642 20.6649 21.4499L22.7114 5.89811C22.7328 5.71864 22.5372 5.59275 22.3819 5.6865ZM19.0069 19.9928H4.98992L3.54885 9.02668L7.2935 11.3329L11.9997 5.05436L16.706 11.3329L20.4506 9.02668L19.0069 19.9928ZM11.9997 11.9142C10.3364 11.9142 8.98367 13.2669 8.98367 14.9303C8.98367 16.5936 10.3364 17.9463 11.9997 17.9463C13.6631 17.9463 15.0158 16.5936 15.0158 14.9303C15.0158 13.2669 13.6631 11.9142 11.9997 11.9142ZM11.9997 16.224C11.2872 16.224 10.7087 15.6454 10.7087 14.9303C10.7087 14.2178 11.2872 13.6365 11.9997 13.6365C12.7122 13.6365 13.2908 14.2151 13.2908 14.9303C13.2908 15.6428 12.7122 16.224 11.9997 16.224Z" fill="white"/>
-            </g>
-            <defs><clipPath id="pp-clip"><rect width="24" height="24" fill="white"/></clipPath></defs>
-        </svg>
-    );
-
-    const PkgIconPremiumPlus = () => (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g clipPath="url(#ppp-clip)">
-                <rect width="24" height="24" fill="white" fillOpacity="0.01"/>
-                <path d="M21.5361 2.57465H19.0718V1.50323C19.0718 1.38537 18.9754 1.28894 18.8576 1.28894H5.14328C5.02542 1.28894 4.92899 1.38537 4.92899 1.50323V2.57465H2.4647C2.15213 2.57465 1.85235 2.69883 1.63133 2.91985C1.4103 3.14088 1.28613 3.44065 1.28613 3.75323V7.71751C1.28613 9.90591 2.89328 11.7247 4.98792 12.0568C5.4031 15.1693 7.9022 17.6202 11.0361 17.963V20.7809H5.78613C5.31203 20.7809 4.92899 21.1639 4.92899 21.638V22.5032C4.92899 22.6211 5.02542 22.7175 5.14328 22.7175H18.8576C18.9754 22.7175 19.0718 22.6211 19.0718 22.5032V21.638C19.0718 21.1639 18.6888 20.7809 18.2147 20.7809H12.9647V17.963C16.0986 17.6202 18.5977 15.1693 19.0129 12.0568C21.1076 11.7247 22.7147 9.90591 22.7147 7.71751V3.75323C22.7147 3.44065 22.5905 3.14088 22.3695 2.91985C22.1485 2.69883 21.8487 2.57465 21.5361 2.57465ZM3.2147 7.71751V4.50323H4.92899V10.0639C4.43144 9.90501 3.99726 9.59209 3.68913 9.17034C3.381 8.74859 3.21487 8.23983 3.2147 7.71751V7.71751ZM17.1433 11.1461C17.1433 12.4613 16.6317 13.7014 15.6995 14.6309C14.7674 15.563 13.5299 16.0747 12.2147 16.0747H11.7861C10.471 16.0747 9.23078 15.563 8.30131 14.6309C7.36917 13.6988 6.85756 12.4613 6.85756 11.1461V3.21751H17.1433V11.1461ZM20.7861 7.71751C20.7861 8.81573 20.0656 9.74787 19.0718 10.0639V4.50323H20.7861V7.71751Z" fill="white"/>
-            </g>
-            <defs><clipPath id="ppp-clip"><rect width="24" height="24" fill="white"/></clipPath></defs>
-        </svg>
-    );
-
-    const FeatureCheck = () => (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginTop: 2 }}>
-            <path d="M0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8Z" fill="#D9F7BE"/>
-            <g clipPath="url(#tier-clip)">
-                <rect width="10" height="10" transform="translate(3 4)" fill="white" fillOpacity="0.01"/>
-                <path d="M12.4648 5.40625H11.6847C11.5753 5.40625 11.4715 5.45647 11.4045 5.54241L6.80299 11.3717L4.59651 8.57589C4.56313 8.53351 4.52059 8.49925 4.47207 8.47567C4.42355 8.45208 4.37032 8.4398 4.31638 8.43973H3.53624C3.46147 8.43973 3.42017 8.52567 3.46593 8.58371L6.52285 12.4565C6.66571 12.6373 6.94026 12.6373 7.08423 12.4565L12.5351 5.54911C12.5809 5.49219 12.5396 5.40625 12.4648 5.40625Z" fill="black" fillOpacity="0.85"/>
-            </g>
-            <defs>
-                <clipPath id="tier-clip">
-                    <rect width="10" height="10" fill="white" transform="translate(3 4)"/>
-                </clipPath>
-            </defs>
-        </svg>
-    );
-
     return (
         <div style={{ margin: "9px 0 18px", fontFamily: ds.fonts.family }}>
-            {/* ── Package cards — 2 columns ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignItems: "start" }}>
-                {PACKAGES.map((pkg, idx) => {
-                    const isExpanded = expandedPkg === pkg.id;
-                    const visibleFeatures = pkg.features.slice(0, FEATURES_SHOWN);
-                    const hiddenCount = pkg.features.length - FEATURES_SHOWN;
-
-                    return (
-                        <div key={pkg.id} style={{ animation: "pkgEnter 0.45s ease both", animationDelay: `${idx * 0.12}s` }}>
-                            <div style={{
-                                background: pkg.id === "premium"
-                                    ? "linear-gradient(to top, #FFF9EA, #ffffff)"
-                                    : "linear-gradient(to top, #F3E8FF, #ffffff)",
-                                borderRadius: 12,
-                                padding: "18px 15px 15px",
-                                border: "1px solid #e5e7eb",
-                            }}>
-                                {/* Icon */}
-                                <div style={{ width: 44, height: 44, borderRadius: 11, background: pkg.iconBg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
-                                    {pkg.id === "premium" ? <PkgIconPremium /> : <PkgIconPremiumPlus />}
-                                </div>
-
-                                {/* Name */}
-                                <div style={{ fontSize: 15, fontWeight: 500, color: "#1a1a1a", marginBottom: 9, lineHeight: 1.2 }}>
-                                    {pkg.name}
-                                </div>
-
-                                {/* Price */}
-                                <div style={{ display: "flex", alignItems: "flex-end", gap: 0, marginBottom: 12 }}>
-                                    <span style={{ fontSize: 22, fontWeight: 700, color: "#1a1a1a", lineHeight: 1, letterSpacing: "-0.03em" }}>{pkg.price}</span>
-                                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1a1a", marginBottom: 1 }}>{pkg.priceSub}</span>
-                                    <span style={{ fontSize: 10, color: "#888", marginBottom: 2, marginLeft: 4 }}>{pkg.priceNote}</span>
-                                </div>
-
-                                {/* CTA */}
-                                <button
-                                    onClick={onBuyCredits}
-                                    style={{
-                                        width: "100%", height: 30, borderRadius: 5,
-                                        border: pkg.buttonDark ? "none" : "1.5px solid #d0d0d0",
-                                        background: pkg.buttonDark ? "#1a1a1a" : "#ffffff",
-                                        color: pkg.buttonDark ? "#ffffff" : "#1a1a1a",
-                                        fontSize: 12, fontWeight: 400, cursor: "pointer",
-                                        fontFamily: ds.fonts.family, marginBottom: 15,
-                                        transition: "opacity 0.15s",
-                                    }}
-                                    onMouseEnter={e => e.currentTarget.style.opacity = "0.82"}
-                                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                                >
-                                    Satın Al
-                                </button>
-
-                                {/* Features */}
-                                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                                    {visibleFeatures.map((f, i) => (
-                                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                                            <FeatureCheck />
-                                            <span style={{ fontSize: 10, color: "#333", lineHeight: 1.4, paddingTop: 1 }}>{f}</span>
-                                        </div>
-                                    ))}
-
-                                    {isExpanded && pkg.features.slice(FEATURES_SHOWN).map((f, i) => (
-                                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, animation: "fadeIn 0.25s ease" }}>
-                                            <FeatureCheck />
-                                            <span style={{ fontSize: 10, color: "#333", lineHeight: 1.4, paddingTop: 1 }}>{f}</span>
-                                        </div>
-                                    ))}
-
-                                    {hiddenCount > 0 && (
-                                        <button
-                                            onClick={() => setExpandedPkg(isExpanded ? null : pkg.id)}
-                                            style={{ background: "none", border: "none", cursor: "pointer", color: "#1a73e8", fontSize: 10, fontWeight: 500, padding: "2px 0", textAlign: "left", fontFamily: ds.fonts.family }}
-                                        >
-                                            {isExpanded ? "Daha az göster" : `+ ${hiddenCount} özellik daha göster`}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
+            {/* Başlık */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <TokenIcon size={16} color="#5f6368" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#202124" }}>Ek Kredi Paketleri</span>
+            </div>
+            {/* Kart listesi — yatay scroll */}
+            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
+                {CREDIT_PACKAGES.map((pkg, idx) => (
+                    <div
+                        key={pkg.id}
+                        style={{
+                            flexShrink: 0,
+                            minWidth: 175,
+                            background: "linear-gradient(to bottom, #eaeaea, #fafafa)",
+                            borderRadius: 12,
+                            padding: 24,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 12,
+                            animation: "pkgEnter 0.4s ease both",
+                            animationDelay: `${idx * 0.07}s`,
+                        }}
+                    >
+                        {/* Kredi tag */}
+                        <div style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "4px 12px",
+                            background: "#fafafa",
+                            border: "1px solid rgba(0,0,0,0.1)",
+                            borderRadius: 8,
+                            alignSelf: "flex-start",
+                        }}>
+                            <TokenIcon size={16} color="#595959" />
+                            <span style={{ fontSize: 16, fontWeight: 500, color: "#595959", lineHeight: "24px", whiteSpace: "nowrap" }}>
+                                {pkg.credits} Kredi
+                            </span>
                         </div>
-                    );
-                })}
+
+                        {/* Divider */}
+                        <div style={{ height: 1, background: "rgba(0,0,0,0.06)", width: "100%" }} />
+
+                        {/* Kredi başına fiyat */}
+                        <span style={{ fontSize: 13, fontWeight: 400, color: "rgba(0,0,0,0.45)", lineHeight: "20px" }}>
+                            {pkg.pricePerCredit} / kredi
+                        </span>
+
+                        {/* Toplam fiyat + buton */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                            <span style={{ fontSize: 20, fontWeight: 700, color: "rgba(0,0,0,0.85)", lineHeight: "28px", whiteSpace: "nowrap" }}>
+                                {pkg.total}
+                            </span>
+                            <button
+                                onClick={onBuyCredits}
+                                style={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    background: "rgba(0,0,0,0.85)",
+                                    color: "#fff",
+                                    border: "1px solid rgba(0,0,0,0.85)",
+                                    borderRadius: 6,
+                                    height: 32,
+                                    padding: "5px 11px",
+                                    fontSize: 14,
+                                    fontWeight: 400,
+                                    lineHeight: "22px",
+                                    cursor: "pointer",
+                                    fontFamily: ds.fonts.family,
+                                    whiteSpace: "nowrap",
+                                    boxShadow: "0px 2px 0px 0px rgba(0,0,0,0.04)",
+                                    transition: "opacity 0.15s",
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.opacity = "0.82"}
+                                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                            >
+                                Satın Al
+                            </button>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -1358,7 +1304,7 @@ export default function TariffAiPage() {
                 </div>
 
                 {/* Scrollable chat messages */}
-                <div className="chat-scroll" style={{ flex: 1, overflowY: "auto", padding: "24px 0" }}>
+                <div className="chat-scroll" style={{ flex: 1, overflowY: "auto", padding: "24px 0", background: "linear-gradient(to bottom, #ffffff, #F3F6FF)" }}>
                     <div style={{ maxWidth: 780, margin: "0 auto", padding: "0 24px" }}>
                         {messages.length === 0 && !isThinking && (
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 300, gap: 10, animation: "fadeIn 0.5s ease" }}>
@@ -1376,15 +1322,16 @@ export default function TariffAiPage() {
                         )}
 
                         {messages.map((msg, i) => (
-                            <div key={i} style={{ display: "flex", gap: 12, marginBottom: 24, flexDirection: msg.role === "user" ? "row-reverse" : "row", animation: "fadeIn 0.35s ease" }}>
-                                <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: msg.role === "user" ? "linear-gradient(135deg,#214F73,#2d6a9f)" : "transparent", color: "white", fontSize: 13, fontWeight: 700, alignSelf: "flex-start" }}>
+                            <div key={i} style={{ display: "flex", marginBottom: 24, flexDirection: "column", alignItems: msg.role === "user" ? "flex-end" : "flex-start", animation: "fadeIn 0.35s ease" }}>
+                                {/* Avatar above bubble */}
+                                <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: msg.role === "user" ? "#d0d0d0" : "transparent", color: "#202124", fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
                                     {msg.role === "user" ? "O" : <AiResponseIcon size={24} />}
                                 </div>
                                 <div
                                     style={{ maxWidth: "75%", display: "flex", flexDirection: "column" }}
                                 >
                                     <div
-                                        style={{ padding: msg.role === "user" ? "12px 18px" : "10px 4px", borderRadius: msg.role === "user" ? 18 : 0, background: msg.role === "user" ? "linear-gradient(135deg,#214F73,#2d6a9f)" : "transparent", color: msg.role === "user" ? "white" : ds.colors.text, fontSize: 14, lineHeight: 1.75, borderBottomRightRadius: msg.role === "user" ? 4 : 18 }}
+                                        style={{ padding: msg.role === "user" ? "12px 18px" : "10px 4px", borderRadius: msg.role === "user" ? 18 : 0, background: msg.role === "user" ? "#F0F0F0" : "transparent", color: msg.role === "user" ? "#202124" : ds.colors.text, fontSize: 14, lineHeight: 1.75, borderBottomRightRadius: msg.role === "user" ? 4 : 18 }}
                                         dangerouslySetInnerHTML={{ __html: msg.content }}
                                     />
                                     {msg.role === "ai" && msg.thinkingSteps && (
@@ -1459,7 +1406,7 @@ export default function TariffAiPage() {
                     <div style={{ flexShrink: 0, padding: "0 24px 0", marginBottom: -3, zIndex: 10, position: "relative" }}>
                         <div style={{ maxWidth: 780, margin: "0 auto", width: "85%" }}>
                             {isOutOfCredits && <div style={{ width: "95%", margin: "0 auto" }}><NoCreditBanner onBuyCredits={handleBuyCredits} /></div>}
-                            {!isOutOfCredits && isChatNearLimit && <div style={{ width: "95%", margin: "0 auto" }}><ChatLimitWarningBanner remaining={chatCreditsRemaining} onNewChat={handleNewChat} /></div>}
+                            {!isOutOfCredits && isChatNearLimit && <div style={{ width: "95%", margin: "0 auto" }}><ChatLimitWarningBanner remaining={chatCreditsRemaining} onNewChat={handleNewChat} onBuyCredits={handleBuyCredits} /></div>}
                         </div>
                     </div>
                 )}
@@ -1499,7 +1446,7 @@ export default function TariffAiPage() {
                                 borderRadius: "8px",
                                 boxShadow: "0px 3px 6px 0px rgba(0,0,0,0.12), 0px 6px 16px 0px rgba(0,0,0,0.08), 0px 9px 28px 0px rgba(0,0,0,0.05)",
                                 border: "1px solid rgba(0, 0, 0, 0.1)",
-                                overflow: "hidden",
+                                overflow: "visible",
                             }}>
 
                                 {/* Link input */}
@@ -1551,7 +1498,7 @@ export default function TariffAiPage() {
                                     <div style={{ paddingBottom: 2, flexShrink: 0 }}>
                                         <button
                                             onClick={() => setShowAttachMenu(!showAttachMenu)}
-                                            style={{ position: "relative", width: 36, height: 36, borderRadius: 8, border: "1px solid #d9d9d9", display: "flex", alignItems: "center", justifyContent: "center", background: "white", cursor: "pointer", transition: "border-color 0.15s" }}
+                                            style={{ position: "relative", width: 36, height: 36, borderRadius: 8, border: "1px solid #d9d9d9", display: "flex", alignItems: "center", justifyContent: "center", background: "white", cursor: "pointer", transition: "border-color 0.15s", outline: "none" }}
                                             onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(0,0,0,0.3)"}
                                             onMouseLeave={e => e.currentTarget.style.borderColor = "#d9d9d9"}
                                         >
