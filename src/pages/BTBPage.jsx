@@ -2,13 +2,13 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
     Card, Typography, Row, Col, Input, Select, Button, Table, Tag,
     Switch, Checkbox, DatePicker, Dropdown, Segmented, Collapse,
-    Divider, Modal, Skeleton, Radio, Tooltip,
+    Modal, Skeleton, Radio, Tooltip,
 } from 'antd';
 import {
     SearchOutlined,
     CloseOutlined,
     AppstoreOutlined, UnorderedListOutlined,
-    BulbOutlined, ControlOutlined,
+    ControlOutlined,
     CaretRightOutlined,
     ColumnHeightOutlined,
     RedoOutlined,
@@ -115,7 +115,6 @@ const MOCK_DATA = Array.from({ length: 32 }, (_, i) => {
     };
 });
 
-const SEARCH_EXAMPLES = ['Nike spor ayakkabı', 'pamuklu tişort', 'Desenli ayıcık şekeri'];
 const statusColor = (s) => s === 'Yürürlükte' ? '#52c41a' : s === 'İptal' ? '#ff4d4f' : '#faad14';
 
 const SortIcon = () => (
@@ -519,7 +518,7 @@ const BTBPage = () => {
     // ─── Tab nav items ────────────────────────────────────────────────────────
 
     const TABS = [
-        { key: 'metin',    icon: <SearchOutlined />, label: 'Metin ile Ara' },
+        { key: 'metin',    icon: <SearchOutlined />, label: 'BTB ile Ara' },
         { key: 'gelismis', icon: <ControlOutlined />, label: 'Detaylı Arama' },
     ];
 
@@ -800,7 +799,7 @@ const BTBPage = () => {
                     />
                     {searchCardCompact && activeTab !== 'gelismis' && (
                         <Input.Search
-                            placeholder="BTB numarası, anahtar kelime veya GTİP yazarak arayabilirsiniz."
+                            placeholder="Bulmak istediğiniz BTB'nin ilk 4 hanesini girin"
                             value={searchText}
                             onChange={e => setSearchText(e.target.value)}
                             onSearch={handleSearch}
@@ -838,19 +837,7 @@ const BTBPage = () => {
                         <div key={activeTab} className="btb-tab-content">
                             {activeTab === 'metin' && !searchCardCompact && (
                                 <div style={{ padding: '20px 24px 24px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, color: '#8c8c8c', fontSize: 13 }}>
-                                        <BulbOutlined /><span>Arama örnekleri;</span>
-                                    </div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 0 }}>
-                                        {SEARCH_EXAMPLES.map(ex => (
-                                            <Tag key={ex} style={{ cursor: 'pointer', borderRadius: 6, fontSize: 12, padding: '3px 12px', background: 'transparent', border: '1px solid #d9d9d9', color: '#595959', lineHeight: '20px' }}
-                                                onClick={() => setSearchText(ex)}>
-                                                {ex}
-                                            </Tag>
-                                        ))}
-                                    </div>
-                                    <Divider style={{ margin: '12px 0' }} />
-                                    <Input size="large" placeholder="BTB numarası, anahtar kelime veya GTİP yazarak arayabilirsiniz."
+                                    <Input size="large" placeholder="Bulmak istediğiniz BTB'nin ilk 4 hanesini girin"
                                         value={searchText} onChange={e => setSearchText(e.target.value)}
                                         style={{ borderRadius: 6, fontSize: 13, background: '#fff', borderWidth: 2 }} onPressEnter={handleSearch} />
                                 </div>
