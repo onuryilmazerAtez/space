@@ -1,14 +1,23 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
     Card, Typography, Row, Col, Input, Select, Button, Table, Tag,
-    Drawer, Switch, Checkbox, DatePicker, Dropdown, Segmented,
-    Divider, Modal, Skeleton, Radio,
+    Switch, Checkbox, DatePicker, Dropdown, Segmented, Collapse,
+    Divider, Modal, Skeleton, Radio, Tooltip,
 } from 'antd';
 import {
     SearchOutlined,
     CloseOutlined,
     AppstoreOutlined, UnorderedListOutlined,
     BulbOutlined, ControlOutlined,
+    CaretRightOutlined,
+    ColumnHeightOutlined,
+    RedoOutlined,
+    PictureOutlined,
+    GlobalOutlined,
+    DownOutlined,
+    DownloadOutlined,
+    ExpandOutlined,
+    QuestionCircleOutlined,
 } from '@ant-design/icons';
 import './BTBPage.css';
 
@@ -36,20 +45,75 @@ const TANIMLAR = [
     'Klasik tasarım saat', 'İthal el örgüsü yün atki',
 ];
 
-const MOCK_DATA = Array.from({ length: 32 }, (_, i) => ({
-    key: String(i + 1),
-    btbNo: `2024-24137`,
-    refNo: `TR · TR410000260002`,
-    gtip: `8471.30.${String(i).padStart(2, '0')}`,
-    tanim: TANIMLAR[i % TANIMLAR.length],
-    tanimUzun: `${TANIMLAR[i % TANIMLAR.length]}. Ürün ambalajında üretici bilgileri, seri numarası ve CE işareti bulunmaktadır. İthalat beyannamesi kapsamında sunulan numune üzerinden yapılan inceleme sonucunda belirlenen sınıflandırmadır.`,
-    gumruk: GUMRUKLER[i % GUMRUKLER.length],
-    tarih: '04.2024 — 04.2027',
-    durum: STATUSES[i % 3],
-    image: IMAGES[i % IMAGES.length],
-    largeImage: IMAGES[i % IMAGES.length].replace('300&h=200', '600&h=400'),
-    gerekce: 'Eşya, dış yüzeyi plastikten mamul, iç kısmı metal alaşımdan oluşan, ağırlığı 2.3 kg olan, endüstriyel kullanıma yönelik bir vana parçasıdır. Kombine Nomanklatür\'ün 84.81 pozisyonuna ilişkin açıklama notları ve 6 sayılı Genel Yorum Kuralı uyarınca bu pozisyonda sınıflandırılmıştır.',
-}));
+const KEYWORD_SETS = [
+    ['TEXTILE ARTICLES', 'OF VEGETABLE TEXTILE MATERIAL', 'FOR STORING', 'OF WOVEN FABRIC', 'OF JUTE', 'ONE-COLOURED', 'PRINTED', 'WITH CORD', 'WITH TIE FASTENING', 'HEMMED', 'MADE UP', 'NOT FOR PACKAGING GOODS'],
+    ['LEATHER GOODS', 'WALLET', 'PERSONAL USE', 'BIFOLD', 'WITH COIN POCKET', 'MADE UP', 'NOT HANDMADE'],
+    ['AROMATIC PREPARATIONS', 'LAVENDER SCENTED', 'VEGETABLE MATERIAL', 'FOR HOME USE', 'MADE UP', 'TEXTILE'],
+    ['LEATHER', 'HANDBAG', 'FASHION ACCESSORIES', 'WITH HANDLE', 'WITH ZIPPER', 'MADE UP'],
+    ['FOOTWEAR', 'SPORTS SHOES', 'RUBBER SOLE', 'TEXTILE UPPER', 'LACE-UP', 'NOT WATERPROOF'],
+];
+
+const TR_BTB_NOS = [
+    'TR060000200016', 'TR060000200017', 'TR090001150034', 'TR090001150035',
+    'TR340002180052', 'TR340002180053', 'TR010003230001', 'TR160004140028',
+    'TR270005190043', 'TR410006160087', 'TR340007200112', 'TR060008220015',
+    'TR550009150094', 'TR160010180063', 'TR270011190021', 'TR410012160045',
+];
+
+const EU_BTB_NOS = [
+    'FR-PRO-2012-002655', 'DE-BTI-2014-000234', 'NL-BTI-2011-001892', 'IT-BTI-2015-003421',
+    'ES-BTI-2013-002156', 'BE-BTI-2016-000987', 'AT-BTI-2018-001234', 'PL-BTI-2017-000456',
+    'CZ-BTI-2019-000789', 'HU-BTI-2020-000321', 'PT-BTI-2016-001567', 'SE-BTI-2018-000432',
+    'DE-BTI-2013-004567', 'FR-BTI-2019-001890', 'NL-BTI-2020-000543', 'IT-BTI-2016-002109',
+];
+
+const EU_GTIP_NOS = [
+    '8471.30.20', '6302.21.10', '4202.12.50', '6404.11.00',
+    '9101.11.00', '3305.10.00', '8517.12.00', '6109.10.10',
+    '9403.60.10', '4016.99.97', '6204.31.00', '8708.29.10',
+    '3304.99.00', '6302.31.10', '8302.41.90', '6217.10.00',
+];
+
+const TR_GTIP_NOS = [
+    '8471.30.20.00.11', '6302.21.10.00.00', '4202.12.50.00.00', '6404.11.00.00.19',
+    '9101.11.00.00.00', '3305.10.00.00.00', '8517.12.00.00.00', '6109.10.10.10.11',
+    '9403.60.10.00.00', '4016.99.97.00.00', '6204.31.00.00.00', '8708.29.10.00.11',
+    '3304.99.00.00.00', '6302.31.10.00.00', '8302.41.90.00.11', '6217.10.00.00.00',
+];
+
+const IPTAL_NEDENLERI = [
+    'Gümrükler Genel Müdürlüğü\'nün 13.05.2026 tarih ve 121753707 sayılı yazısı çerçevesinde yapılan inceleme neticesinde; söz konusu BTB\'nin, aynı ambalaj içerisinde birden fazla eşyayı içermekle birlikte set eşya niteliği taşımayan ve içeriğindeki her bir eşyanın kendi GTİP\'inde ayrı ayrı sınıflandırılması gereken ürünlere ilişkin düzenlendiği tespit edilmiştir.\nBilindiği üzere, set eşyanın sınıflandırılması Tarifenin Yorumuna İlişkin GYK Kural 3(b) esas alınarak yapılmakta olup 2016/6 sayılı Rehber ile 2011/40 sayılı Genelge de bu çerçevede hazırlanmıştır. Mezkûr kural kapsamında "perakende satılacak hale getirilmiş takım halinde bulunan eşya"nın; (a) ilk bakışta farklı pozisyonlarda sınıflandırılabilen en az iki farklı parçadan oluşması, (b) özel bir gereksinmeyi karşılamak veya belirli bir işlevi yerine getirmek üzere bir araya getirilmiş bulunması ve (c) yeniden paketlemeye gerek kalmadan son kullanıcılara doğrudan satış için uygun biçimde düzenlenmiş olması şartlarını birlikte taşıması gerekmektedir. Bu koşulları taşımayan eşya set olarak değil, içeriğindeki her kalem eşyanın ilgili GTİP\'i itibarıyla ayrı ayrı sınıflandırılacaktır.\nBu bağlamda, söz konusu BTB\'nin birden fazla eşyayı kapsadığı ve içeriğindeki her bir eşyanın ayrı GTİP\'lerde sınıflandırılması gerektiği; ancak Bağlayıcı Tarife Bilgisi sisteminde mezkûr eşyanın birden fazla GTİP altında sınıflandırılmasının sistemsel olarak mümkün olmadığı ve bu durumun Gümrük Genel Tebliği (Tarife) (Seri No:14)\'ün 9 uncu maddesinde yer alan "BTB başvurusu sadece bir kalem eşya için yapılır" hükmüyle çeliştiği tespit edilmiştir.\nBu itibarla; söz konusu BTB, 4458 sayılı Gümrük Kanunu\'nun 9 uncu maddesinin beşinci fıkrası ile Gümrük Genel Tebliği (Tarife) (Seri No:14)\'ün 18 inci maddesi çerçevesinde 10.06.2026 tarihinde iptal edilmiştir.',
+    'GTİP numarasında değişiklik yapılmış ve ilgili tarife pozisyonu yeniden sınıflandırılmıştır. Mevcut karar geçerliliğini yitirmiştir.',
+    'Avrupa Topluluğu Adalet Divanı kararı gereğince sınıflandırma revize edilmiş, bu karara aykırı BTB\'ler iptal edilmiştir.',
+];
+
+const MOCK_DATA = Array.from({ length: 32 }, (_, i) => {
+    const hasImage = i % 3 !== 0;
+    const durum = STATUSES[i % 3];
+    const isTR = i % 2 === 0;
+    const btbNum = isTR
+        ? TR_BTB_NOS[Math.floor(i / 2) % TR_BTB_NOS.length]
+        : EU_BTB_NOS[Math.floor(i / 2) % EU_BTB_NOS.length];
+    const countryCode = isTR ? 'TR' : btbNum.substring(0, 2);
+    return {
+        key: String(i + 1),
+        btbNo: btbNum,
+        refNo: `${countryCode} · ${btbNum}`,
+        gtip: isTR
+            ? TR_GTIP_NOS[Math.floor(i / 2) % TR_GTIP_NOS.length]
+            : EU_GTIP_NOS[Math.floor(i / 2) % EU_GTIP_NOS.length],
+        tanim: TANIMLAR[i % TANIMLAR.length],
+        tanimUzun: `${TANIMLAR[i % TANIMLAR.length]}. Ürün ambalajında üretici bilgileri, seri numarası ve CE işareti bulunmaktadır. İthalat beyannamesi kapsamında sunulan numune üzerinden yapılan inceleme sonucunda belirlenen sınıflandırmadır.`,
+        gumruk: GUMRUKLER[i % GUMRUKLER.length],
+        tarih: '04.2024 — 04.2027',
+        durum,
+        image: hasImage ? IMAGES[i % IMAGES.length] : null,
+        largeImage: hasImage ? IMAGES[i % IMAGES.length].replace('300&h=200', '600&h=400') : null,
+        gerekce: 'AV 1 / AV 6 / AV 5 b) Anm 1 Kap 63 / Anm 7 f) ABS XI / Anm 8 a) ABS XI ErlKN Pos 6305 (KN) RZ 01.0',
+        keywords: KEYWORD_SETS[i % KEYWORD_SETS.length],
+        iptalNedeni: durum === 'İptal' ? IPTAL_NEDENLERI[i % IPTAL_NEDENLERI.length] : null,
+    };
+});
 
 const SEARCH_EXAMPLES = ['Nike spor ayakkabı', 'pamuklu tişort', 'Desenli ayıcık şekeri'];
 const statusColor = (s) => s === 'Yürürlükte' ? '#52c41a' : s === 'İptal' ? '#ff4d4f' : '#faad14';
@@ -110,32 +174,39 @@ const FlagUK = () => (
 
 // ─── Country Config ───────────────────────────────────────────────────────────
 
+const FlagGlobe = () => <GlobalOutlined style={{ fontSize: 16, flexShrink: 0 }} />;
+
 const COUNTRY_OPTIONS = [
-    { value: 'tr', label: 'Türkiye',        Flag: FlagTR },
-    { value: 'eu', label: 'Europe',         Flag: FlagEU },
-    { value: 'uk', label: 'United Kingdom', Flag: FlagUK },
+    { value: 'all', label: 'Tüm Ülkeler',   Flag: FlagGlobe },
+    { value: 'tr',  label: 'Türkiye',        Flag: FlagTR },
+    { value: 'eu',  label: 'Europe',         Flag: FlagEU },
+    { value: 'uk',  label: 'United Kingdom', Flag: FlagUK },
 ];
 
 const COUNTRY_META = {
-    tr: { subtitle: 'T.C. Ticaret Bakanlığı — BTB Sorgulama Sistemi', total: '1.840' },
-    eu: { subtitle: 'Avrupa Birliği — EBTI Sorgulama Sistemi',         total: '12.430' },
-    uk: { subtitle: 'HMRC — BTI Sorgulama Sistemi',                    total: '3.210' },
+    all: { subtitle: 'Tüm Sistemler — BTB Sorgulama',                  total: '17.480' },
+    tr:  { subtitle: 'T.C. Ticaret Bakanlığı — BTB Sorgulama Sistemi', total: '1.840' },
+    eu:  { subtitle: 'Avrupa Birliği — EBTI Sorgulama Sistemi',        total: '12.430' },
+    uk:  { subtitle: 'HMRC — BTI Sorgulama Sistemi',                   total: '3.210' },
 };
 
 const ADDED_VALUES = {
-    tr: { '30': '47',  '7': '12', 'today': '3' },
-    eu: { '30': '312', '7': '74', 'today': '9' },
-    uk: { '30': '88',  '7': '21', 'today': '2' },
+    all: { '30': '447', '7': '107', 'today': '14' },
+    tr:  { '30': '47',  '7': '12',  'today': '3' },
+    eu:  { '30': '312', '7': '74',  'today': '9' },
+    uk:  { '30': '88',  '7': '21',  'today': '2' },
 };
 const UPDATED_VALUES = {
-    tr: { '30': '3',  '7': '1', 'today': '0' },
-    eu: { '30': '41', '7': '8', 'today': '1' },
-    uk: { '30': '14', '7': '3', 'today': '0' },
+    all: { '30': '58', '7': '12', 'today': '1' },
+    tr:  { '30': '3',  '7': '1',  'today': '0' },
+    eu:  { '30': '41', '7': '8',  'today': '1' },
+    uk:  { '30': '14', '7': '3',  'today': '0' },
 };
 const CANCELLED_VALUES = {
-    tr: { '30': '9',  '7': '2', 'today': '1' },
-    eu: { '30': '57', '7': '9', 'today': '0' },
-    uk: { '30': '22', '7': '4', 'today': '1' },
+    all: { '30': '88', '7': '15', 'today': '2' },
+    tr:  { '30': '9',  '7': '2',  'today': '1' },
+    eu:  { '30': '57', '7': '9',  'today': '0' },
+    uk:  { '30': '22', '7': '4',  'today': '1' },
 };
 
 const PERIOD_OPTIONS_ADDED = [
@@ -188,21 +259,12 @@ const FormRow = ({ label, required, children }) => (
     </div>
 );
 
-// Reusable text block used in drawer for both sections
-const DrawerTextBlock = ({ title, content }) => (
-    <div style={{ marginBottom: 20 }}>
-        <Text strong style={{ fontSize: 13, color: '#1d3557', display: 'block', marginBottom: 8 }}>{title}</Text>
-        <div style={{ background: '#f8fafb', borderRadius: 6, padding: 16, border: '1px solid #e8ecf0', fontSize: 13, color: '#3d5a73', lineHeight: 1.7 }}>
-            {content}
-        </div>
-    </div>
-);
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const BTBPage = () => {
     const [activeTab, setActiveTab]           = useState('metin');
-    const [country, setCountry]               = useState('tr');
+    const [country, setCountry]               = useState('all');
     const [viewMode, setViewMode]             = useState('liste');
     const [searchText, setSearchText]         = useState('');
     const [resultCount, setResultCount]       = useState('10');
@@ -217,11 +279,26 @@ const BTBPage = () => {
     const [updatedPeriod, setUpdatedPeriod]     = useState('30');
     const [cancelledPeriod, setCancelledPeriod] = useState('30');
     const [sortOrder, setSortOrder]             = useState('desc');
-    const [countryBarHidden, setCountryBarHidden] = useState(false);
     const [isMobile, setIsMobile]               = useState(() => window.innerWidth <= 768);
+    const [compactRows, setCompactRows]         = useState(false);
+    const [collapseKeys, setCollapseKeys]       = useState(['genel-bakis']);
+    const [statsCountry, setStatsCountry]       = useState('all');
+    const [detailWidth, setDetailWidth]         = useState(750);
+    const [countryInHeader, setCountryInHeader] = useState(false);
+    const [detailRevealed, setDetailRevealed]   = useState(false);
+    const [detailResetting, setDetailResetting] = useState(false);
+    const [detailImgExpanded, setDetailImgExpanded] = useState(false);
+    const [expandedImgHeight, setExpandedImgHeight] = useState(300);
+    const [searchCardOpen, setSearchCardOpen]       = useState(true);
+    const [searchCollapsed, setSearchCollapsed]     = useState(false);
 
-    const resultsRef   = useRef(null);
-    const countryRef   = useRef(null);
+    const resultsRef           = useRef(null);
+    const detailWidthRef       = useRef(750);
+    const bottomBarRef         = useRef(null);
+    const detailRevealTimerRef = useRef(null);
+    const imgRef               = useRef(null);
+    const imgWrapRef           = useRef(null);
+    const headerRef            = useRef(null);
 
     useEffect(() => {
         const onResize = () => setIsMobile(window.innerWidth <= 768);
@@ -230,22 +307,47 @@ const BTBPage = () => {
     }, []);
 
     useEffect(() => {
-        const el = countryRef.current;
+        const el = headerRef.current;
         if (!el) return;
-        const findScrollParent = (node) => {
-            if (!node || node === document.body) return window;
-            const oy = window.getComputedStyle(node).overflowY;
-            if (oy === 'auto' || oy === 'scroll') return node;
-            return findScrollParent(node.parentElement);
+        const ro = new ResizeObserver(() => {
+            document.documentElement.style.setProperty('--btb-header-h', `${el.offsetHeight}px`);
+        });
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (drawerOpen) { setCountryInHeader(false); return; }
+        const el = bottomBarRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => setCountryInHeader(!entry.isIntersecting),
+            { threshold: 0 }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [drawerOpen]);
+
+    const handleResizeStart = useCallback((e) => {
+        e.preventDefault();
+        const startX = e.clientX;
+        const startW = detailWidthRef.current;
+        const onMove = (ev) => {
+            const maxW = Math.max(380, window.innerWidth - 536); // 520 min main-pane + 16 handle
+            const newW = Math.max(380, Math.min(Math.min(960, maxW), startW + (startX - ev.clientX)));
+            detailWidthRef.current = newW;
+            setDetailWidth(newW);
         };
-        const scrollEl = findScrollParent(el.parentElement);
-        const onScroll = () => {
-            if (countryRef.current) {
-                setCountryBarHidden(countryRef.current.getBoundingClientRect().bottom < 0);
-            }
+        const onUp = () => {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
         };
-        scrollEl.addEventListener('scroll', onScroll, { passive: true });
-        return () => scrollEl.removeEventListener('scroll', onScroll);
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
     }, []);
 
     // Advanced search
@@ -263,11 +365,31 @@ const BTBPage = () => {
     const [colBtb, setColBtb]     = useState('');
     const [colGtip, setColGtip]   = useState('');
     const [colTanim, setColTanim] = useState(undefined);
-    const [colGumruk, setColGumruk] = useState('');
     const [colTarih, setColTarih] = useState('');
     const [colDurum, setColDurum] = useState(undefined);
 
-    const openDrawer = (rec) => { setSelected(rec); setDrawerOpen(true); };
+    const openDetail = (rec) => {
+        setSelected(rec);
+        setDrawerOpen(true);
+        setCollapseKeys([]);
+        setDetailImgExpanded(false);
+        setDetailWidth(750);
+        detailWidthRef.current = 750;
+        setDetailRevealed(false);
+        setDetailResetting(true);
+        if (detailRevealTimerRef.current) clearTimeout(detailRevealTimerRef.current);
+        detailRevealTimerRef.current = setTimeout(() => {
+            setDetailResetting(false);
+            detailRevealTimerRef.current = setTimeout(() => setDetailRevealed(true), 400);
+        }, 16);
+    };
+    const closeDetail = () => {
+        setSelected(null);
+        setDrawerOpen(false);
+        setCollapseKeys(['genel-bakis']);
+        setDetailWidth(750);
+        detailWidthRef.current = 750;
+    };
 
     const handleSearch = useCallback(() => {
         setLoading(true);
@@ -287,14 +409,21 @@ const BTBPage = () => {
         }
     }, [searched, resultsKey]);
 
-    const filteredData = MOCK_DATA.filter(r => {
-        if (colBtb    && !r.btbNo.toLowerCase().includes(colBtb.toLowerCase()))     return false;
-        if (colGtip   && !r.gtip.toLowerCase().includes(colGtip.toLowerCase()))     return false;
-        if (colGumruk && !r.gumruk.toLowerCase().includes(colGumruk.toLowerCase())) return false;
-        if (colTanim  && r.tanim !== colTanim)   return false;
-        if (colDurum  && r.durum !== colDurum)   return false;
-        return true;
-    });
+    const filteredData = MOCK_DATA
+        .filter(r => {
+            if (country === 'tr' && !r.btbNo.startsWith('TR'))        return false;
+            if (country === 'eu' && r.btbNo.startsWith('TR'))         return false;
+            if (country === 'uk' && !r.btbNo.startsWith('GB'))        return false;
+            if (colBtb    && !r.btbNo.toLowerCase().includes(colBtb.toLowerCase()))     return false;
+            if (colGtip   && !r.gtip.toLowerCase().includes(colGtip.toLowerCase()))     return false;
+            if (colTanim  && r.tanim !== colTanim)   return false;
+            if (colDurum  && r.durum !== colDurum)   return false;
+            return true;
+        })
+        .sort((a, b) => sortOrder === 'desc'
+            ? parseInt(b.key) - parseInt(a.key)
+            : parseInt(a.key) - parseInt(b.key)
+        );
 
     // ─── Table columns ───────────────────────────────────────────────────────
     const columns = [
@@ -303,32 +432,40 @@ const BTBPage = () => {
             dataIndex: 'image',
             key: 'img',
             width: 72,
-            render: img => (
+            fixed: 'left',
+            render: img => img ? (
                 <img src={img} alt=""
                     style={{ width: 54, height: 54, borderRadius: 6, objectFit: 'cover', cursor: 'zoom-in', display: 'block' }}
                     onClick={e => { e.stopPropagation(); setPreviewImg(img.replace('300&h=200', '1200&h=800')); }}
                 />
+            ) : (
+                <div style={{ width: 54, height: 54, borderRadius: 6, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bfbfbf" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                </div>
             ),
         },
         {
             title: (<div><div style={TH}>BTB No</div><Input size="small" placeholder="Giriniz" value={colBtb} onChange={e => setColBtb(e.target.value)} style={{ marginTop: 4 }} /></div>),
-            dataIndex: 'btbNo', key: 'btbNo', width: 140,
-            render: v => <Text style={{ fontSize: 13, fontWeight: 400 }}>{v}</Text>,
+            dataIndex: 'btbNo', key: 'btbNo', width: 175,
+            render: v => <Text style={{ fontSize: 13, fontWeight: 400, whiteSpace: 'nowrap' }}>{v}</Text>,
         },
         {
             title: (<div><div style={TH}>GTİP</div><Input size="small" placeholder="Giriniz" value={colGtip} onChange={e => setColGtip(e.target.value)} style={{ marginTop: 4 }} /></div>),
-            dataIndex: 'gtip', key: 'gtip', width: 130,
-            render: v => <Text style={{ fontSize: 13, fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>{v}</Text>,
+            dataIndex: 'gtip', key: 'gtip', width: 155,
+            render: v => <Text style={{ fontSize: 13, fontFamily: 'Inter, sans-serif', fontWeight: 400, whiteSpace: 'nowrap' }}>{v}</Text>,
         },
         {
             title: (<div><div style={TH}>Eşya Tanımı</div><Select size="small" placeholder="Seçiniz" value={colTanim} onChange={setColTanim} allowClear style={{ marginTop: 4, width: '100%' }} options={[...new Set(MOCK_DATA.map(r => r.tanim))].map(t => ({ value: t, label: t }))} /></div>),
             dataIndex: 'tanim', key: 'tanim', ellipsis: true,
-            render: v => <Text style={{ fontSize: 13 }}>{v}</Text>,
-        },
-        {
-            title: (<div><div style={TH}>Gümrük</div><Input size="small" placeholder="Giriniz" value={colGumruk} onChange={e => setColGumruk(e.target.value)} style={{ marginTop: 4 }} /></div>),
-            dataIndex: 'gumruk', key: 'gumruk', width: 190, ellipsis: true,
-            render: v => <Text style={{ fontSize: 13 }}>{v}</Text>,
+            render: (v, record) => (
+                <Tooltip title={record.tanimUzun} styles={{ root: { maxWidth: 360 } }} placement="topLeft">
+                    <Text style={{ fontSize: 13 }}>{v}</Text>
+                </Tooltip>
+            ),
         },
         {
             title: (<div><div style={TH}>Başlangıç - Bitiş Tarihi</div><Input size="small" placeholder="Giriniz" value={colTarih} onChange={e => setColTarih(e.target.value)} style={{ marginTop: 4 }} /></div>),
@@ -336,13 +473,45 @@ const BTBPage = () => {
             render: v => <Text style={{ fontSize: 12, color: '#8c8c8c' }}>{v}</Text>,
         },
         {
-            title: (<div><div style={TH}>Geçerlilik</div><Select size="small" placeholder="Seçiniz" value={colDurum} onChange={setColDurum} allowClear style={{ marginTop: 4, width: '100%' }} options={STATUSES.map(s => ({ value: s, label: s }))} /></div>),
-            dataIndex: 'durum', key: 'durum', width: 130,
+            title: (
+                <div>
+                    <div style={{ ...TH, whiteSpace: 'nowrap' }}>Statü</div>
+                    {drawerOpen ? (
+                        <Select
+                            size="small"
+                            placeholder="—"
+                            value={colDurum}
+                            onChange={setColDurum}
+                            allowClear
+                            popupMatchSelectWidth={false}
+                            style={{ marginTop: 4, width: '100%' }}
+                            labelRender={({ value }) => value ? (
+                                <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: statusColor(String(value)), display: 'inline-block' }} />
+                                </span>
+                            ) : null}
+                            options={STATUSES.map(s => ({
+                                value: s,
+                                label: (
+                                    <span style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: statusColor(s), display: 'inline-block' }} />
+                                    </span>
+                                ),
+                            }))}
+                        />
+                    ) : (
+                        <Select size="small" placeholder="Seçiniz" value={colDurum} onChange={setColDurum} allowClear style={{ marginTop: 4, width: '100%' }} options={STATUSES.map(s => ({ value: s, label: s }))} />
+                    )}
+                </div>
+            ),
+            dataIndex: 'durum', key: 'durum', width: drawerOpen ? 82 : 110, fixed: 'right',
             render: v => (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor(v), display: 'inline-block', flexShrink: 0 }} />
-                    {v}
-                </span>
+                <Tooltip title={v}>
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: drawerOpen ? 'center' : 'flex-start', gap: 6, fontSize: 13 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor(v), display: 'inline-block', flexShrink: 0 }} />
+                        {!drawerOpen && v}
+                    </span>
+                </Tooltip>
             ),
         },
     ];
@@ -356,24 +525,41 @@ const BTBPage = () => {
 
     // ─── Bottom search bar (shared) ───────────────────────────────────────────
 
-    const BottomBar = (
-        <div className="btb-search-bar">
+    const searchCardCompact = drawerOpen || searchCollapsed;
+
+    const searchBarControls = (
+        <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontSize: 13, color: '#595959', whiteSpace: 'nowrap' }}>Sonuç hacmi :</Text>
-                <Select value={resultCount} onChange={setResultCount} style={{ width: 70 }} size="small"
+                {!searchCardCompact && <Text style={{ fontSize: 13, color: '#595959', whiteSpace: 'nowrap' }}>Sonuç hacmi :</Text>}
+                <Select value={resultCount} onChange={setResultCount}
+                    style={{ width: 70 }}
+                    size={searchCardCompact ? 'middle' : 'small'}
                     options={['10', '25', '50', '100'].map(v => ({ value: v, label: v }))} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontSize: 13, color: '#595959' }}>Sadece resimli</Text>
-                <Switch checked={onlyWithImg} onChange={setOnlyWithImg} />
+                {!searchCardCompact && <Text style={{ fontSize: 13, color: '#595959' }}>Sadece resimli</Text>}
+                <Switch
+                    checked={onlyWithImg}
+                    onChange={setOnlyWithImg}
+                    checkedChildren={searchCardCompact ? <PictureOutlined /> : undefined}
+                    unCheckedChildren={searchCardCompact ? <PictureOutlined /> : undefined}
+                />
             </div>
-            <Button type="primary" loading={loading}
-                style={{ borderRadius: 6, paddingLeft: 28, paddingRight: 28, fontWeight: 600 }}
-                onClick={handleSearch}>
-                Ara
-            </Button>
-        </div>
+            {!searchCardCompact && (
+                <Button type="primary" loading={loading}
+                    style={{ borderRadius: 6, paddingLeft: 28, paddingRight: 28, fontWeight: 600 }}
+                    onClick={handleSearch}>
+                    Ara
+                </Button>
+            )}
+        </>
     );
+
+    const BottomBar = !searchCardCompact ? (
+        <div ref={bottomBarRef} className="btb-search-bar">
+            {searchBarControls}
+        </div>
+    ) : null;
 
     // ─── Tab contents ────────────────────────────────────────────────────────
 
@@ -429,165 +615,254 @@ const BTBPage = () => {
             <FormRow label="Açıklama" required>
                 <Input style={{ width: 400 }} value={advDesc} onChange={e => setAdvDesc(e.target.value)} />
             </FormRow>
+            {searchCardCompact && (
+                <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10,
+                    margin: '4px -24px 0', padding: '14px 24px',
+                    borderTop: '1px solid #f0f0f0',
+                }}>
+                    <Text style={{ fontSize: 13, color: '#595959', whiteSpace: 'nowrap' }}>Sonuç hacmi :</Text>
+                    <Select value={resultCount} onChange={setResultCount} size="small" style={{ width: 70 }}
+                        options={['10', '25', '50', '100'].map(v => ({ value: v, label: v }))} />
+                    <Switch checked={onlyWithImg} onChange={setOnlyWithImg}
+                        checkedChildren={<PictureOutlined />} unCheckedChildren={<PictureOutlined />} />
+                    <Button type="primary" loading={loading} style={{ borderRadius: 6, fontWeight: 600 }} onClick={handleSearch}>
+                        Ara
+                    </Button>
+                </div>
+            )}
         </div>
     );
 
     // ─── Render ──────────────────────────────────────────────────────────────
     return (
-        <div style={{ minHeight: '100%' }}>
-            {/* Full-width white page header — sticky */}
-            <div style={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 20,
-                background: '#fff',
-                borderBottom: '1px solid #e5e7eb',
-            }}>
-                <div className="btb-page-header-inner" style={{ maxWidth: 910, margin: '0 auto', padding: '16px 22px 16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                        <Title level={3} style={{ margin: 0, fontWeight: 700, fontSize: 22 }}>
-                            Bağlayıcı Tarife Bilgisi
-                        </Title>
-                        <Text type="secondary" style={{ fontSize: 13, fontWeight: 400 }}>
-                            T.C. Ticaret Bakanlığı — BTB Sorgulama Sistemi
-                        </Text>
+        <>
+        {/* Full-width page header — sticky, spans entire screen */}
+        <div className="btb-full-header" ref={headerRef}>
+            <div className="btb-page-header-inner" style={{ maxWidth: drawerOpen ? 'none' : 1120, margin: drawerOpen ? '0' : '0 auto', padding: '16px 22px 16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                    <Title level={3} style={{ margin: 0, fontWeight: 700, fontSize: 22 }}>
+                        Bağlayıcı Tarife Bilgisi
+                    </Title>
+                    <Text type="secondary" style={{ fontSize: 13, fontWeight: 400 }}>
+                        {COUNTRY_META.all.subtitle}
+                    </Text>
+                </div>
+                {countryInHeader && !drawerOpen && (
+                    <div style={{ display: 'flex', gap: 6 }}>
+                        {COUNTRY_OPTIONS.map(opt => {
+                            const active = country === opt.value;
+                            return (
+                                <button key={opt.value} onClick={() => setCountry(opt.value)} style={{
+                                    display: 'flex', alignItems: 'center', gap: 7,
+                                    padding: '4px 12px', borderRadius: 6, cursor: 'pointer',
+                                    fontSize: 13, fontWeight: active ? 500 : 400,
+                                    background: active ? '#1677ff' : '#fff',
+                                    color: active ? '#fff' : '#374151',
+                                    border: active ? '1px solid #1677ff' : '1px solid #d1d5db',
+                                    transition: 'all 0.15s', whiteSpace: 'nowrap', lineHeight: 1,
+                                }}>
+                                    <opt.Flag />{opt.label}
+                                </button>
+                            );
+                        })}
                     </div>
-                    {countryBarHidden && (
-                        <div className="btb-sticky-country" style={{ display: 'flex', gap: 6 }}>
-                            {COUNTRY_OPTIONS.map(opt => {
-                                const active = country === opt.value;
+                )}
+            </div>
+        </div>
+
+        <div className={`btb-page-root${drawerOpen ? ' btb-page-root--expanded' : ''}${drawerOpen && !isMobile ? ' btb-page-root--split-mode' : ''}`}>
+            {/* Split layout area below header */}
+            <div className="btb-split-layout">
+            {/* LEFT: Main content */}
+            <div className={`btb-main-pane${drawerOpen ? ' btb-main-pane--shifted' : ''}`}>
+
+        <div className="btb-content-wrapper" style={{ margin: drawerOpen ? 0 : '0 auto', maxWidth: drawerOpen ? 'none' : 1120, padding: '24px 22px 24px 32px' }}>
+
+            {/* Stat Cards — Genel Bakış (Collapsible) */}
+            <Collapse
+                activeKey={collapseKeys}
+                onChange={setCollapseKeys}
+                expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} style={{ fontSize: 12, color: '#8c8c8c' }} />}
+                style={{ background: '#fff', borderRadius: 6, border: '1px solid #e5e7eb', marginBottom: 20 }}
+                items={[{
+                    key: 'genel-bakis',
+                    label: <span style={{ fontSize: 15, fontWeight: 600, color: '#111827', letterSpacing: '-0.01em' }}>Genel Bakış</span>,
+                    extra: (
+                        <div onClick={e => e.stopPropagation()}>
+                            <Dropdown
+                                menu={{
+                                    items: COUNTRY_OPTIONS.map(opt => ({
+                                        key: opt.value,
+                                        icon: <opt.Flag />,
+                                        label: opt.label,
+                                    })),
+                                    selectedKeys: [statsCountry],
+                                    onClick: ({ key }) => setStatsCountry(key),
+                                }}
+                                trigger={['click']}
+                            >
+                                {(() => {
+                                    const sel = COUNTRY_OPTIONS.find(o => o.value === statsCountry);
+                                    const Flag = sel?.Flag;
+                                    return (
+                                        <button style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                                            padding: '2px 10px', borderRadius: 6, cursor: 'pointer',
+                                            fontSize: 12, fontWeight: 400,
+                                            background: '#fff', color: '#374151',
+                                            border: '1px solid #d9d9d9',
+                                            fontFamily: 'inherit', whiteSpace: 'nowrap', lineHeight: '20px',
+                                        }}>
+                                            {Flag && <Flag />}{sel?.label}<DownOutlined style={{ fontSize: 10, color: '#8c8c8c' }} />
+                                        </button>
+                                    );
+                                })()}
+                            </Dropdown>
+                        </div>
+                    ),
+                    children: (
+                        <div className="btb-stat-segments" style={{ display: 'flex', flexWrap: drawerOpen ? 'wrap' : 'nowrap', margin: '-12px -16px -12px -16px' }}>
+                            {STATS.map((s, i) => {
+                                const isAdded     = s.key === 'added';
+                                const isUpdated   = s.key === 'updated';
+                                const isCancelled = s.key === 'cancelled';
+                                const isDynamic   = isAdded || isUpdated || isCancelled;
+                                const value = isAdded     ? ADDED_VALUES[statsCountry][addedPeriod]
+                                            : isUpdated   ? UPDATED_VALUES[statsCountry][updatedPeriod]
+                                            : isCancelled ? CANCELLED_VALUES[statsCountry][cancelledPeriod]
+                                            : COUNTRY_META[statsCountry].total;
+                                const periodValue  = isAdded ? addedPeriod : isUpdated ? updatedPeriod : cancelledPeriod;
+                                const periodSetter = isAdded ? setAddedPeriod : isUpdated ? setUpdatedPeriod : setCancelledPeriod;
+                                const periodOpts   = isAdded ? PERIOD_OPTIONS_ADDED : isUpdated ? PERIOD_OPTIONS_UPDATED : PERIOD_OPTIONS_CANCELLED;
+                                const borderRight = drawerOpen
+                                    ? (i % 2 === 0 ? '1px solid #e5e7eb' : 'none')
+                                    : (i < STATS.length - 1 ? '1px solid #e5e7eb' : 'none');
+                                const borderBottom = drawerOpen && i < 2 ? '1px solid #e5e7eb' : 'none';
                                 return (
-                                    <button key={opt.value} onClick={() => setCountry(opt.value)} style={{
-                                        display: 'flex', alignItems: 'center', gap: 7,
-                                        padding: '5px 12px', borderRadius: 6, cursor: 'pointer',
-                                        fontSize: 13, fontWeight: active ? 500 : 400,
-                                        background: active ? '#1677ff' : '#fff',
-                                        color: active ? '#fff' : '#374151',
-                                        border: active ? '1px solid #1677ff' : '1px solid #d1d5db',
-                                        transition: 'all 0.15s', whiteSpace: 'nowrap',
+                                    <div key={i} className="btb-stat-segment" style={{
+                                        flex: drawerOpen ? '0 0 50%' : 1,
+                                        minWidth: 0,
+                                        boxSizing: 'border-box',
+                                        padding: drawerOpen ? '12px 14px 10px' : '16px 20px 14px',
+                                        borderRight,
+                                        borderBottom,
+                                        display: 'flex', flexDirection: 'column', gap: 2,
                                     }}>
-                                        <opt.Flag />{opt.label}
-                                    </button>
+                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                                            <span style={{ fontSize: 22, fontWeight: 700, color: '#111827', lineHeight: 1, letterSpacing: '-0.03em' }}>
+                                                {value}
+                                            </span>
+                                            {s.link && <a href="#" style={{ fontSize: 12, color: '#1677ff' }}>{s.link}</a>}
+                                        </div>
+                                        {isDynamic ? (
+                                            <Select
+                                                value={periodValue}
+                                                onChange={periodSetter}
+                                                options={periodOpts}
+                                                variant="borderless"
+                                                size="small"
+                                                popupMatchSelectWidth={false}
+                                                style={{ fontSize: 12, color: '#6b7280', marginLeft: -8, marginTop: 2 }}
+                                            />
+                                        ) : (
+                                            <span style={{ fontSize: 12, color: '#6b7280', fontWeight: 400, lineHeight: 1.3 }}>{s.label}</span>
+                                        )}
+                                    </div>
                                 );
                             })}
                         </div>
-                    )}
-                </div>
-            </div>
-
-        <div className="btb-content-wrapper" style={{ maxWidth: 910, margin: '0 auto', padding: '0 22px 24px 32px' }}>
-
-            {/* Country selector */}
-            <div ref={countryRef} style={{ display: 'flex', gap: 6, marginTop: 32, marginBottom: 20 }}>
-                {COUNTRY_OPTIONS.map(opt => {
-                    const active = country === opt.value;
-                    return (
-                        <button
-                            key={opt.value}
-                            onClick={() => setCountry(opt.value)}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: 7,
-                                padding: '6px 14px', borderRadius: 6, cursor: 'pointer',
-                                fontSize: 13, fontWeight: active ? 500 : 400,
-                                background: active ? '#1677ff' : '#fff',
-                                color: active ? '#fff' : '#374151',
-                                border: active ? '1px solid #1677ff' : '1px solid #d1d5db',
-                                transition: 'all 0.15s',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            <opt.Flag />
-                            {opt.label}
-                        </button>
-                    );
-                })}
-            </div>
-
-            {/* Stat Cards — Performans Özeti stili */}
-            <div style={{ width: '100%', background: '#fff', borderRadius: 6, border: '1px solid #e5e7eb', overflow: 'hidden', marginBottom: 20 }}>
-                {/* Header */}
-                <div style={{ padding: '14px 20px', borderBottom: '1px solid #e5e7eb' }}>
-                    <span style={{ fontSize: 15, fontWeight: 600, color: '#111827', letterSpacing: '-0.01em' }}>Genel Bakış</span>
-                </div>
-                {/* Segments */}
-                <div className="btb-stat-segments" style={{ display: 'flex' }}>
-                    {STATS.map((s, i) => {
-                        const isAdded     = s.key === 'added';
-                        const isUpdated   = s.key === 'updated';
-                        const isCancelled = s.key === 'cancelled';
-                        const isDynamic   = isAdded || isUpdated || isCancelled;
-                        const value = isAdded     ? ADDED_VALUES[country][addedPeriod]
-                                    : isUpdated   ? UPDATED_VALUES[country][updatedPeriod]
-                                    : isCancelled ? CANCELLED_VALUES[country][cancelledPeriod]
-                                    : COUNTRY_META[country].total;
-                        const periodValue  = isAdded ? addedPeriod : isUpdated ? updatedPeriod : cancelledPeriod;
-                        const periodSetter = isAdded ? setAddedPeriod : isUpdated ? setUpdatedPeriod : setCancelledPeriod;
-                        const periodOpts   = isAdded ? PERIOD_OPTIONS_ADDED : isUpdated ? PERIOD_OPTIONS_UPDATED : PERIOD_OPTIONS_CANCELLED;
-                        return (
-                            <div key={i} className="btb-stat-segment" style={{
-                                flex: 1,
-                                padding: '16px 20px 14px',
-                                borderRight: i < STATS.length - 1 ? '1px solid #e5e7eb' : 'none',
-                                display: 'flex', flexDirection: 'column', gap: 2,
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                                    <span style={{ fontSize: 22, fontWeight: 700, color: '#111827', lineHeight: 1, letterSpacing: '-0.03em' }}>
-                                        {value}
-                                    </span>
-                                    {s.link && <a href="#" style={{ fontSize: 12, color: '#1677ff' }}>{s.link}</a>}
-                                </div>
-                                {isDynamic ? (
-                                    <Select
-                                        value={periodValue}
-                                        onChange={periodSetter}
-                                        options={periodOpts}
-                                        variant="borderless"
-                                        size="small"
-                                        popupMatchSelectWidth={false}
-                                        style={{ fontSize: 12, color: '#6b7280', marginLeft: -8, marginTop: 2 }}
-                                    />
-                                ) : (
-                                    <span style={{ fontSize: 12, color: '#6b7280', fontWeight: 400, lineHeight: 1.3 }}>{s.label}</span>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
+                    ),
+                }]}
+            />
 
             {/* Search panel */}
-            <Card className="btb-search-card" styles={{ body: { padding: 0 } }} style={{ marginBottom: 20 }}>
+            <Card className={`btb-search-card${searchCardCompact ? ' btb-search-card--open' : ''}`} styles={{ body: { padding: 0 } }} style={{ marginBottom: 20 }}>
 
                 {/* Tab nav */}
-                <div className="btb-tab-nav-wrap" style={{ padding: '16px 24px', borderBottom: '1px solid #f0f0f0' }}>
+                <div className="btb-tab-nav-wrap" style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {!drawerOpen && (
+                        <Button
+                            type="text"
+                            size="small"
+                            icon={<CaretRightOutlined rotate={searchCollapsed ? 0 : 90} style={{ transition: 'transform 0.3s ease', fontSize: 12, color: '#8c8c8c' }} />}
+                            onClick={() => setSearchCollapsed(v => !v)}
+                        />
+                    )}
                     <Segmented
                         value={activeTab}
                         onChange={setActiveTab}
-                        options={TABS.map(t => ({ value: t.key, label: t.label, icon: t.icon }))}
-                        style={{ width: isMobile ? '100%' : 'auto' }}
+                        options={TABS.map(t => searchCardCompact
+                            ? { value: t.key, icon: t.icon }
+                            : { value: t.key, label: t.label, icon: t.icon }
+                        )}
+                        style={{ flexShrink: 0, width: isMobile && !searchCardCompact ? '100%' : 'auto' }}
                     />
+                    {searchCardCompact && activeTab !== 'gelismis' && (
+                        <Input.Search
+                            placeholder="BTB numarası, anahtar kelime veya GTİP yazarak arayabilirsiniz."
+                            value={searchText}
+                            onChange={e => setSearchText(e.target.value)}
+                            onSearch={handleSearch}
+                            loading={loading}
+                            enterButton
+                            style={{ fontSize: 13, flex: 1 }}
+                            className="btb-nav-search"
+                        />
+                    )}
+                    {searchCardCompact && activeTab !== 'gelismis' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                            {searchBarControls}
+                        </div>
+                    )}
+                    {searchCardCompact && activeTab === 'gelismis' && (
+                        <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<CaretRightOutlined rotate={searchCardOpen ? 270 : 90} style={{ transition: 'transform 0.3s ease', fontSize: 12, color: '#8c8c8c' }} />}
+                                onClick={() => setSearchCardOpen(v => !v)}
+                            />
+                        </div>
+                    )}
                 </div>
 
-                {activeTab === 'metin' && (
-                    <div style={{ padding: '20px 24px 24px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, color: '#8c8c8c', fontSize: 13 }}>
-                            <BulbOutlined /><span>Arama örnekleri;</span>
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateRows: (searchCardCompact && activeTab === 'gelismis' && !searchCardOpen) ? '0fr' : '1fr',
+                        transition: 'grid-template-rows 0.38s cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                >
+                    <div style={{ overflow: 'hidden', minHeight: 0 }}>
+                        <div key={activeTab} className="btb-tab-content">
+                            {activeTab === 'metin' && !searchCardCompact && (
+                                <div style={{ padding: '20px 24px 24px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, color: '#8c8c8c', fontSize: 13 }}>
+                                        <BulbOutlined /><span>Arama örnekleri;</span>
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 0 }}>
+                                        {SEARCH_EXAMPLES.map(ex => (
+                                            <Tag key={ex} style={{ cursor: 'pointer', borderRadius: 6, fontSize: 12, padding: '3px 12px', background: 'transparent', border: '1px solid #d9d9d9', color: '#595959', lineHeight: '20px' }}
+                                                onClick={() => setSearchText(ex)}>
+                                                {ex}
+                                            </Tag>
+                                        ))}
+                                    </div>
+                                    <Divider style={{ margin: '12px 0' }} />
+                                    <Input size="large" placeholder="BTB numarası, anahtar kelime veya GTİP yazarak arayabilirsiniz."
+                                        value={searchText} onChange={e => setSearchText(e.target.value)}
+                                        style={{ borderRadius: 6, fontSize: 13, background: '#fff', borderWidth: 2 }} onPressEnter={handleSearch} />
+                                </div>
+                            )}
+                            {activeTab === 'gelismis' && (
+                                <div className="btb-gelismis-expand">
+                                    <div>{GelismisContent}</div>
+                                </div>
+                            )}
                         </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 0 }}>
-                            {SEARCH_EXAMPLES.map(ex => (
-                                <Tag key={ex} style={{ cursor: 'pointer', borderRadius: 6, fontSize: 12, padding: '3px 12px', background: '#fff', border: '1px solid #d9d9d9', color: '#595959', lineHeight: '20px' }}
-                                    onClick={() => setSearchText(ex)}>
-                                    {ex}
-                                </Tag>
-                            ))}
-                        </div>
-                        <Divider style={{ margin: '12px 0' }} />
-                        <Input size="large" placeholder="BTB numarası, anahtar kelime veya GTİP yazarak arayabilirsiniz."
-                            value={searchText} onChange={e => setSearchText(e.target.value)}
-                            style={{ borderRadius: 6, fontSize: 13, background: '#f5f5f5', borderWidth: 2 }} onPressEnter={handleSearch} />
                     </div>
-                )}
-                {activeTab === 'gelismis' && GelismisContent}
+                </div>
 
                 {BottomBar}
             </Card>
@@ -600,10 +875,41 @@ const BTBPage = () => {
                 <div ref={resultsRef} key={resultsKey} className="btb-results-appear">
                     <div className="btb-results-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <Text strong style={{ fontSize: 16 }}>Sonuçlar</Text>
-                            <Tag color="red" style={{ borderRadius: 20, fontWeight: 600, fontSize: 12 }}>32 Kayıt</Tag>
+                            <Text strong style={{ fontSize: 16, whiteSpace: 'nowrap' }}>Sonuçlar</Text>
+                            <Tag style={{ borderRadius: 20, fontWeight: 600, fontSize: 12, background: '#f0f0f0', color: '#595959', border: '1px solid #e0e0e0', margin: 0 }}>{filteredData.length} Kayıt</Tag>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <Dropdown
+                                menu={{
+                                    items: COUNTRY_OPTIONS.map(opt => ({
+                                        key: opt.value,
+                                        icon: <opt.Flag />,
+                                        label: opt.label,
+                                    })),
+                                    selectedKeys: [country],
+                                    onClick: ({ key }) => setCountry(key),
+                                }}
+                                trigger={['click']}
+                            >
+                                {(() => {
+                                    const sel = COUNTRY_OPTIONS.find(o => o.value === country);
+                                    const Flag = sel?.Flag;
+                                    return (
+                                        <button style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                                            padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+                                            fontSize: 13, fontWeight: 400,
+                                            background: '#fff', color: '#374151',
+                                            border: '1px solid #d9d9d9',
+                                            fontFamily: 'inherit', whiteSpace: 'nowrap',
+                                        }}>
+                                            {Flag && <Flag />}
+                                            {sel?.label}
+                                            <DownOutlined style={{ fontSize: 10, color: '#8c8c8c' }} />
+                                        </button>
+                                    );
+                                })()}
+                            </Dropdown>
                             <Dropdown
                                 menu={{
                                     items: [
@@ -616,16 +922,29 @@ const BTBPage = () => {
                                 trigger={['click']}
                             >
                                 <button style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                                    padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-                                    fontSize: 13, color: '#595959',
-                                    background: '#fff', border: '1px solid #d9d9d9',
+                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                    padding: '5px 8px', borderRadius: 6, cursor: 'pointer',
+                                    color: '#595959', background: '#fff', border: '1px solid #d9d9d9',
                                     fontFamily: 'inherit',
                                 }}>
                                     <SortIcon />
-                                    {sortOrder === 'desc' ? 'Yeniden Eskiye' : 'Eskiden Yeniye'}
                                 </button>
                             </Dropdown>
+                            <button
+                                onClick={() => setCompactRows(c => !c)}
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                    padding: '5px 8px', borderRadius: 6, cursor: 'pointer',
+                                    color: compactRows ? '#1677ff' : '#595959',
+                                    background: compactRows ? '#f0f7ff' : '#fff',
+                                    border: compactRows ? '1px solid #1677ff' : '1px solid #d9d9d9',
+                                    fontFamily: 'inherit',
+                                    transition: 'all 0.15s',
+                                }}
+                                title={compactRows ? 'Satırları büyüt' : 'Satırları küçült'}
+                            >
+                                <ColumnHeightOutlined />
+                            </button>
                             <div className="btb-view-toggle">
                                 <button className={`btb-view-btn${viewMode === 'kart' ? ' active' : ''}`} onClick={() => setViewMode('kart')}>
                                     <AppstoreOutlined /> Kart
@@ -640,85 +959,79 @@ const BTBPage = () => {
                     {viewMode === 'kart' ? (
                         <Row gutter={[16, 16]}>
                             {filteredData.slice(0, parseInt(resultCount)).map(rec => (
-                                <Col xs={12} sm={8} md={6} key={rec.key}>
-                                    <Card hoverable className="btb-result-card" styles={{ body: { padding: '10px 12px 12px' } }}
-                                        cover={
-                                            <div style={{ height: 130, overflow: 'hidden' }}>
-                                                <img src={rec.image} alt=""
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'zoom-in' }}
-                                                    onClick={e => { e.stopPropagation(); setPreviewImg(rec.largeImage); }} />
+                                <Col xs={drawerOpen ? 24 : 12} sm={drawerOpen ? 24 : 8} md={drawerOpen ? 24 : 6} key={rec.key}>
+                                    {drawerOpen ? (
+                                        /* Horizontal layout when drawer is open */
+                                        <Card hoverable className="btb-result-card" styles={{ body: { padding: 0 } }} onClick={() => openDetail(rec)}>
+                                            <div style={{ display: 'flex', alignItems: 'stretch', minHeight: 76 }}>
+                                                <div style={{ width: 100, flexShrink: 0, background: '#f0f0f0', overflow: 'hidden', borderRadius: '6px 0 0 6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    {rec.image ? (
+                                                        <img src={rec.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ) : (
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#bfbfbf" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                                            <path d="M21 15l-5-5L5 21" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                                <div style={{ flex: 1, padding: '10px 12px', minWidth: 0 }}>
+                                                    <Text style={{ fontSize: 12, fontFamily: 'Inter, sans-serif', fontWeight: 400, display: 'block', color: '#595959' }}>{rec.gtip}</Text>
+                                                    <Text style={{ fontSize: 13, color: '#1d3557', display: 'block', marginTop: 2, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rec.tanim}</Text>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                                        <Text style={{ fontSize: 11, color: '#8c8c8c' }}>{rec.refNo}</Text>
+                                                        <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0 }}>
+                                                            <span style={{ width: 7, height: 7, borderRadius: '50%', background: statusColor(rec.durum), display: 'inline-block' }} />
+                                                            <Text style={{ fontSize: 11, color: statusColor(rec.durum) }}>{rec.durum}</Text>
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        }
-                                        onClick={() => openDrawer(rec)}>
-                                        <Text style={{ fontSize: 13, fontFamily: 'Inter, sans-serif', fontWeight: 400, display: 'block' }}>{rec.gtip}</Text>
-                                        <Text style={{ fontSize: 11, color: '#8c8c8c', display: 'block', marginBottom: 6 }}>{rec.refNo}</Text>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
-                                            <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor(rec.durum), display: 'inline-block', flexShrink: 0 }} />
-                                            {rec.durum}
-                                        </span>
-                                    </Card>
+                                        </Card>
+                                    ) : (
+                                        /* Vertical grid layout */
+                                        <Card hoverable className="btb-result-card" styles={{ body: { padding: '10px 12px 12px' } }}
+                                            cover={
+                                                <div style={{ height: 130, overflow: 'hidden', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    {rec.image ? (
+                                                        <img src={rec.image} alt=""
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'zoom-in' }}
+                                                            onClick={e => { e.stopPropagation(); setPreviewImg(rec.largeImage); }} />
+                                                    ) : (
+                                                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#bfbfbf" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                                            <path d="M21 15l-5-5L5 21" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                            }
+                                            onClick={() => openDetail(rec)}>
+                                            <Text style={{ fontSize: 13, fontFamily: 'Inter, sans-serif', fontWeight: 400, display: 'block' }}>{rec.gtip}</Text>
+                                            <Text style={{ fontSize: 12, color: '#1d3557', display: 'block', marginTop: 2, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rec.tanim}</Text>
+                                            <Text style={{ fontSize: 11, color: '#8c8c8c', display: 'block', marginBottom: 6 }}>{rec.refNo}</Text>
+                                            <Tooltip title={rec.durum}>
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+                                                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor(rec.durum), display: 'inline-block', flexShrink: 0 }} />
+                                                    {rec.durum}
+                                                </span>
+                                            </Tooltip>
+                                        </Card>
+                                    )}
                                 </Col>
                             ))}
                         </Row>
                     ) : (
                         <Card styles={{ body: { padding: 0 } }} style={{ borderRadius: 6, overflow: 'hidden', border: '1px solid #e8ecf0' }}>
-                            <Table className="btb-list-table" columns={columns} dataSource={filteredData} rowKey="key" size="middle"
-                                scroll={{ x: 700 }}
+                            <Table className={`btb-list-table${compactRows ? ' btb-list-table--compact' : ''}`} columns={columns} dataSource={filteredData} rowKey="key" size={compactRows ? 'small' : 'middle'}
+                                scroll={{ x: 820 }}
+                                rowClassName={rec => rec.key === selected?.key ? 'btb-row-active' : ''}
                                 pagination={{ pageSize: parseInt(resultCount), showTotal: (t, r) => `${r[0]}-${r[1]} / ${t}`, style: { padding: '12px 16px' } }}
-                                onRow={rec => ({ onClick: () => openDrawer(rec), style: { cursor: 'pointer' } })} />
+                                onRow={rec => ({ onClick: () => openDetail(rec), style: { cursor: 'pointer' } })} />
                         </Card>
                     )}
                 </div>
             )}
-
-            {/* Detail Drawer */}
-            <Drawer title={null} placement={isMobile ? 'bottom' : 'right'}
-                width={isMobile ? '100%' : 480} height={isMobile ? '92%' : undefined}
-                open={drawerOpen} onClose={() => setDrawerOpen(false)} closable={false}
-                styles={{ body: { padding: 0 } }}>
-                {selected && (
-                    <>
-                        <div style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', background: 'transparent' }}>
-                            <Text style={{ fontSize: 16, fontWeight: 500, fontFamily: 'Inter, sans-serif', color: 'rgba(0,0,0,0.88)' }}>BTB Detay Bilgi</Text>
-                            <Button type="text" icon={<CloseOutlined />} onClick={() => setDrawerOpen(false)} />
-                        </div>
-
-                        <div style={{ width: '100%', height: 220, cursor: 'zoom-in' }} onClick={() => setPreviewImg(selected.largeImage)}>
-                            <img src={selected.largeImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </div>
-
-                        <div style={{ padding: 24, overflowY: 'auto', background: `linear-gradient(to bottom, ${statusColor(selected.durum)}3B 0%, #ffffff 50%)` }}>
-                            <Text strong style={{ fontSize: 15, color: '#1d3557', display: 'block', marginBottom: 8 }}>{selected.tanim}</Text>
-                            <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-                                <Tag style={{ borderRadius: 6, fontWeight: 400, fontFamily: 'Inter, sans-serif', fontSize: 13, background: '#fff', borderColor: '#d9d9d9', color: '#595959' }}>{selected.gtip}</Tag>
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.88)' }}>
-                                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor(selected.durum), display: 'inline-block', flexShrink: 0 }} />
-                                    {selected.durum}
-                                </span>
-                            </div>
-                            <Divider style={{ margin: '0 0 16px' }} />
-
-                            {[
-                                ['BTB No', selected.btbNo],
-                                ['Gümrük İdaresi', selected.gumruk],
-                                ['Geçerlilik Tarihi', selected.tarih],
-                                ['BTB Referansı', selected.refNo],
-                            ].map(([label, val]) => (
-                                <div key={label} style={{ display: 'flex', padding: '10px 0', borderBottom: '1px solid #f5f5f5' }}>
-                                    <Text style={{ width: 140, color: '#8c8c8c', fontSize: 13, flexShrink: 0 }}>{label}</Text>
-                                    <Text style={{ color: '#1d3557', fontSize: 13, fontWeight: 500 }}>{val}</Text>
-                                </div>
-                            ))}
-
-                            <div style={{ marginTop: 20 }}>
-                                <DrawerTextBlock title="Eşyanın Tanımı" content={selected.tanimUzun} />
-                                <DrawerTextBlock title="Sınıflandırma Gerekçesi" content={selected.gerekce} />
-                            </div>
-
-                        </div>
-                    </>
-                )}
-            </Drawer>
 
             {/* Image Preview Modal */}
             <Modal open={!!previewImg} footer={null} onCancel={() => setPreviewImg(null)} centered width="fit-content"
@@ -730,6 +1043,207 @@ const BTBPage = () => {
             </Modal>
         </div>
         </div>
+
+            {/* Dim overlay when image is expanded (desktop only) */}
+            {!isMobile && detailImgExpanded && (
+                <div
+                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 28, animation: 'btbFadeIn 0.3s ease' }}
+                    onClick={() => setDetailImgExpanded(false)}
+                />
+            )}
+
+            {/* RIGHT: Detail Panel (inline card, replaces Drawer) */}
+            {isMobile && drawerOpen && (
+                <div className="btb-mobile-overlay" onClick={closeDetail} />
+            )}
+            {!isMobile && drawerOpen && (
+                <div className="btb-resize-handle" onMouseDown={handleResizeStart}>
+                    <div className="btb-resize-grip">
+                        <svg width="8" height="14" viewBox="0 0 8 14" fill="none" aria-hidden="true">
+                            <circle cx="2" cy="2"  r="1.5" fill="#8c8c8c"/>
+                            <circle cx="6" cy="2"  r="1.5" fill="#8c8c8c"/>
+                            <circle cx="2" cy="7"  r="1.5" fill="#8c8c8c"/>
+                            <circle cx="6" cy="7"  r="1.5" fill="#8c8c8c"/>
+                            <circle cx="2" cy="12" r="1.5" fill="#8c8c8c"/>
+                            <circle cx="6" cy="12" r="1.5" fill="#8c8c8c"/>
+                        </svg>
+                    </div>
+                    <Tooltip title="Panel genişliğini sıfırla" placement="left">
+                        <button
+                            className="btb-resize-reset"
+                            onMouseDown={e => e.stopPropagation()}
+                            onClick={() => { setDetailWidth(750); detailWidthRef.current = 750; }}
+                        >
+                            <RedoOutlined />
+                        </button>
+                    </Tooltip>
+                </div>
+            )}
+            <div className={`btb-detail-pane${drawerOpen ? ' btb-detail-pane--open' : ''}`}
+                 style={{
+                     ...(drawerOpen && !isMobile ? { flex: `0 0 ${detailWidth}px` } : undefined),
+                     ...(detailImgExpanded ? { zIndex: 29 } : undefined),
+                 }}>
+                {selected && (
+                    <div className="btb-detail-card">
+                        {isMobile && (
+                            <div className="btb-bottom-sheet-handle">
+                                <div style={{ width: 40, height: 4, borderRadius: 2, background: '#d9d9d9' }} />
+                            </div>
+                        )}
+                        <div style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f0f0', overflow: 'hidden' }}>
+                            <Text ellipsis={{ tooltip: selected.tanim }} style={{ fontSize: 15, fontWeight: 500, fontFamily: 'Inter, sans-serif', color: 'rgba(0,0,0,0.88)', flex: 1, minWidth: 0 }}>
+                                {selected.tanim}
+                            </Text>
+                            <Button type="text" icon={<CloseOutlined />} onClick={closeDetail} style={{ flexShrink: 0 }} />
+                        </div>
+
+                        {selected.largeImage ? (
+                            <div
+                                ref={imgWrapRef}
+                                className="btb-img-wrap"
+                                style={{
+                                    alignItems: detailImgExpanded ? 'flex-start' : 'center',
+                                    maxHeight: detailImgExpanded ? expandedImgHeight : 220,
+                                    transition: 'max-height 0.55s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    cursor: detailImgExpanded ? 'zoom-out' : 'zoom-in',
+                                }}
+                                onClick={() => {
+                                    if (!detailImgExpanded && imgRef.current && imgWrapRef.current) {
+                                        const img = imgRef.current;
+                                        const wrapW = imgWrapRef.current.offsetWidth;
+                                        const h = Math.round((img.naturalHeight / img.naturalWidth) * wrapW);
+                                        setExpandedImgHeight(h || 400);
+                                    }
+                                    setDetailImgExpanded(v => !v);
+                                }}
+                            >
+                                {!detailImgExpanded && (
+                                    <div className="btb-img-hover-hint"><ExpandOutlined style={{ marginRight: 6 }} />Tamamını görmek için tıkla</div>
+                                )}
+                                <img ref={imgRef} src={selected.largeImage} alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                            </div>
+                        ) : (
+                            <div style={{ width: '100%', height: 220, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#bfbfbf" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                                    <circle cx="8.5" cy="8.5" r="1.5" />
+                                    <path d="M21 15l-5-5L5 21" />
+                                </svg>
+                            </div>
+                        )}
+
+                        <div style={{ padding: 24 }}>
+                            <div className={`t-skel${detailRevealed ? ' is-revealed' : ''}${detailResetting ? ' is-resetting' : ''}`}>
+                                {/* Skeleton placeholder */}
+                                <div className={`t-skel-skeleton${!detailRevealed ? ' is-pulsing' : ''}`}>
+                                    <div style={{ display: 'flex', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f5f5f5', gap: 12 }}>
+                                        <div style={{ width: 160, height: 13, background: '#f0f0f0', borderRadius: 4, flexShrink: 0 }} />
+                                        <div style={{ width: 100, height: 24, background: '#f0f0f0', borderRadius: 12 }} />
+                                    </div>
+                                    {[80, 120, 60, 140, 110, 20, 30, 20].map((w, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f5f5f5', gap: 12 }}>
+                                            <div style={{ width: 160, height: 13, background: '#f0f0f0', borderRadius: 4, flexShrink: 0 }} />
+                                            <div style={{ width: `${w + 40}px`, height: 13, background: '#f0f0f0', borderRadius: 4 }} />
+                                        </div>
+                                    ))}
+                                    {[64, 48, 100, 48].map((h, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', padding: '10px 0', borderBottom: i < 3 ? '1px solid #f5f5f5' : 'none', gap: 12 }}>
+                                            <div style={{ width: 160, height: 13, background: '#f0f0f0', borderRadius: 4, flexShrink: 0, marginTop: 4 }} />
+                                            <div style={{ flex: 1, height: h, background: '#f0f0f0', borderRadius: 6 }} />
+                                        </div>
+                                    ))}
+                                    <div style={{ marginTop: 20, height: 38, background: '#f0f0f0', borderRadius: 6 }} />
+                                </div>
+
+                                {/* Real content */}
+                                <div className="t-skel-content">
+                                    {/* Durum badge */}
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid #f5f5f5' }}>
+                                        <Text style={{ width: 160, minWidth: 160, color: '#8c8c8c', fontSize: 13 }}>Durum</Text>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '4px 12px', borderRadius: 20, background: `${statusColor(selected.durum)}18`, border: `1px solid ${statusColor(selected.durum)}40` }}>
+                                            <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor(selected.durum), display: 'inline-block', flexShrink: 0 }} />
+                                            <Text style={{ fontSize: 13, fontWeight: 600, color: statusColor(selected.durum) }}>{selected.durum}</Text>
+                                            {selected.durum === 'Mülga' && (
+                                                <Tooltip title="Eski bir kanunun yerine yenisi çıktığında, geçerliliğini kaybeden eski kanun için kullanılır.">
+                                                    <QuestionCircleOutlined style={{ fontSize: 13, color: statusColor(selected.durum), cursor: 'help' }} />
+                                                </Tooltip>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {[
+                                        ['Eşya Kodu',              selected.gtip.replace(/\./g, '')],
+                                        ['Karar Tarihi',           selected.tarih.split('—')[0].trim()],
+                                        ['Güncelleme Tarihi',      selected.tarih.split('—')[1]?.trim() ?? '-'],
+                                        ['Başlangıç - Bitiş Tarihi', selected.tarih],
+                                        ['BTB Numarası',           selected.btbNo],
+                                        ['Fasıl',                  selected.gtip.substring(0, 2)],
+                                        ['Kararı Veren Birim',     selected.btbNo.substring(0, 2)],
+                                        ['Başvuru Sahibi',         '-'],
+                                    ].map(([label, val]) => (
+                                        <div key={label} style={{ display: 'flex', alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid #f5f5f5' }}>
+                                            <Text style={{ width: 160, minWidth: 160, color: '#8c8c8c', fontSize: 13 }}>{label}</Text>
+                                            <Text style={{ color: '#1d3557', fontSize: 13 }}>{val}</Text>
+                                        </div>
+                                    ))}
+
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid #f5f5f5' }}>
+                                        <Text style={{ width: 160, minWidth: 160, color: '#8c8c8c', fontSize: 13 }}>Eşya Tanımı</Text>
+                                        <div style={{ flex: 1, background: '#fff', borderRadius: 6, padding: '12px 14px', border: '1px solid #e8ecf0', fontSize: 13, color: '#3d5a73', lineHeight: 1.7 }}>
+                                            {selected.tanimUzun}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid #f5f5f5' }}>
+                                        <Text style={{ width: 160, minWidth: 160, color: '#8c8c8c', fontSize: 13 }}>Karar Özeti</Text>
+                                        <div style={{ flex: 1, background: '#fff', borderRadius: 6, padding: '12px 14px', border: '1px solid #e8ecf0', fontSize: 13, color: '#3d5a73', lineHeight: 1.7 }}>
+                                            {selected.gerekce}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid #f5f5f5' }}>
+                                        <Text style={{ width: 160, minWidth: 160, color: '#8c8c8c', fontSize: 13, paddingTop: 4 }}>Anahtar Kelimeler</Text>
+                                        <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                            {(selected.keywords || []).map(kw => (
+                                                <Tag key={kw} style={{ margin: 0, fontSize: 12, borderRadius: 4 }}>{kw}</Tag>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '10px 0', borderBottom: selected.durum === 'İptal' ? '1px solid #f5f5f5' : 'none' }}>
+                                        <Text style={{ width: 160, minWidth: 160, color: '#8c8c8c', fontSize: 13 }}>Yasal Dayanak</Text>
+                                        <div style={{ flex: 1, background: '#fff', borderRadius: 6, padding: '12px 14px', border: '1px solid #e8ecf0', fontSize: 13, color: '#3d5a73', lineHeight: 1.7 }}>
+                                            {selected.gerekce}
+                                        </div>
+                                    </div>
+
+                                    {selected.durum === 'İptal' && (
+                                        <div style={{ display: 'flex', alignItems: 'flex-start', padding: '10px 0' }}>
+                                            <Text style={{ width: 160, minWidth: 160, color: '#8c8c8c', fontSize: 13, paddingTop: 4 }}>İptal Nedeni</Text>
+                                            <div style={{ flex: 1, background: '#fff5f5', border: '1px solid #ffccc7', borderRadius: 6, padding: '12px 14px', fontSize: 13, color: '#a8071a', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+                                                {selected.iptalNedeni}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div style={{ marginTop: 20, paddingBottom: 4 }}>
+                                        <Button
+                                            icon={<DownloadOutlined />}
+                                            style={{ width: '100%', height: 38, fontSize: 13, borderRadius: 6 }}
+                                            onClick={() => {}}
+                                        >
+                                            PDF İndir
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+        </div>
+        </>
     );
 };
 

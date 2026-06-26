@@ -2,6 +2,223 @@
    BTB Page – Bağlayıcı Tarife Bilgisi
    ────────────────────────────────────────────── */
 
+/* ── Full-width sticky header ───────────────────── */
+.btb-full-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    width: 100%;
+}
+
+/* ── Page root width control ────────────────────── */
+.btb-page-root {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    transition: max-width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btb-page-root--expanded {
+    max-width: 1500px;
+}
+
+/* ── Split-pane layout ──────────────────────────── */
+.btb-split-layout {
+    display: flex;
+    width: 100%;
+    position: relative;
+    gap: 0;
+    align-items: flex-start;
+}
+
+.btb-main-pane {
+    flex: 1 1 auto;
+    min-width: 520px;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Split-screen independent scroll mode ───────── */
+.btb-page-root--split-mode {
+    height: calc(100vh - var(--btb-header-h, 64px));
+    overflow: hidden;
+}
+
+.btb-page-root--split-mode .btb-split-layout {
+    height: 100%;
+    overflow: hidden;
+    align-items: stretch;
+}
+
+.btb-page-root--split-mode .btb-main-pane {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.btb-page-root--split-mode .btb-detail-pane--open {
+    position: relative !important;
+    top: auto !important;
+    max-height: none !important;
+    height: 100%;
+    overflow-y: auto;
+    align-self: stretch;
+}
+
+.btb-page-root--split-mode .btb-resize-handle {
+    align-self: stretch;
+}
+
+.btb-main-pane--shifted {
+    flex: 1 1 auto;
+}
+
+.btb-detail-pane {
+    flex: 0 0 0px;
+    overflow: hidden;
+    transition: flex 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.3s ease;
+    opacity: 0;
+    min-width: 0;
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+    align-self: flex-start;
+}
+
+.btb-detail-pane--open {
+    opacity: 1;
+    overflow-y: auto;
+}
+
+/* Resize handle between panes */
+.btb-resize-handle {
+    flex-shrink: 0;
+    width: 16px;
+    align-self: stretch;
+    cursor: col-resize;
+    background: transparent;
+    z-index: 5;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Vertical divider line through the handle */
+.btb-resize-handle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: #e5e7eb;
+    transform: translateX(-50%);
+    z-index: 0;
+}
+
+/* Grip icon button — centered on the border line between panes */
+.btb-resize-grip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 36px;
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: col-resize;
+    pointer-events: none;
+    box-shadow: none;
+    transition: border-color 0.15s, background 0.15s;
+    z-index: 1;
+}
+
+.btb-resize-handle:hover .btb-resize-grip {
+    background: #f0f7ff;
+    border-color: #1677ff;
+}
+
+.btb-resize-reset {
+    position: absolute;
+    top: calc(50% + 34px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #8c8c8c;
+    font-size: 11px;
+    padding: 0;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    z-index: 1;
+}
+
+.btb-resize-reset:hover {
+    background: #f0f7ff;
+    border-color: #1677ff;
+    color: #1677ff;
+}
+
+/* ── Image area in detail card ──────────────────── */
+.btb-img-wrap {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+}
+
+.btb-img-hover-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 14px;
+    background: linear-gradient(transparent 40%, rgba(0, 0, 0, 0.52));
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.btb-img-wrap:hover .btb-img-hover-hint {
+    opacity: 1;
+}
+
+/* Detail card styling */
+.btb-detail-card {
+    position: relative;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: none;
+    margin: 24px 16px 16px 22px;
+}
+
+/* Collapse overrides for Genel Bakış */
+.btb-page-root .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+    padding: 14px 20px;
+}
+.btb-page-root .ant-collapse > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+    padding: 12px 16px;
+}
+
 /* Stat cards — no hover effect */
 .btb-stat-card {
     border-radius: 6px !important;
@@ -21,6 +238,11 @@
     background: #fafafa;
 }
 
+.btb-search-card--open,
+.btb-search-card--open .ant-card-body {
+    background: #fff !important;
+}
+
 /* ── Custom tab nav ─────────────────────────────── */
 /* Bottom search bar */
 .btb-search-bar {
@@ -31,6 +253,27 @@
     padding: 16px 24px;
     border-top: 1px solid #f0f0f0;
     background: #fafafa;
+}
+
+/* Tab content fade-in */
+.btb-tab-content {
+    animation: btbFadeIn 0.22s ease both;
+}
+
+/* Detaylı Arama smooth expand — grid 0fr→1fr trick */
+@keyframes btbExpandGrid {
+    from { grid-template-rows: 0fr; }
+    to   { grid-template-rows: 1fr; }
+}
+
+.btb-gelismis-expand {
+    display: grid;
+    animation: btbExpandGrid 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.btb-gelismis-expand > * {
+    overflow: hidden;
+    min-height: 0;
 }
 
 /* Results appear animation */
@@ -111,8 +354,23 @@
     vertical-align: middle;
 }
 
+/* Compact rows override */
+.btb-list-table.btb-list-table--compact .ant-table-thead > tr > th {
+    padding: 5px 10px !important;
+}
+
+.btb-list-table.btb-list-table--compact .ant-table-tbody > tr > td {
+    padding: 5px 10px !important;
+}
+
 .btb-list-table .ant-table-tbody > tr:hover > td {
     background: #f0f7ff !important;
+}
+
+/* Nav search bar — white background */
+.btb-nav-search .ant-input,
+.btb-nav-search .ant-input-affix-wrapper {
+    background: #fff !important;
 }
 
 /* Gelişmiş Arama form rows */
@@ -138,6 +396,31 @@
 .btb-adv-field {
     flex: 1;
     padding-top: 2px;
+}
+
+/* ── Mobile overlay + bottom sheet ─────────────── */
+.btb-mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 99;
+    animation: btbFadeIn 0.2s ease;
+}
+
+@keyframes btbFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes btbSlideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+
+.btb-bottom-sheet-handle {
+    display: none;
+    justify-content: center;
+    padding: 10px 0 6px;
 }
 
 /* ── Responsive ─────────────────────────────────── */
@@ -233,4 +516,122 @@
     .btb-adv-field > div .ant-picker {
         flex: 1 1 120px;
     }
+
+    /* Bottom sheet detail panel */
+    .btb-detail-pane--open {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        flex: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 78vh;
+        max-height: 78vh;
+        overflow-y: auto;
+        z-index: 100;
+        animation: btbSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        opacity: 1 !important;
+    }
+
+    .btb-detail-card {
+        margin: 0 !important;
+        border-radius: 16px 16px 0 0 !important;
+        border: none !important;
+        box-shadow: 0 -4px 24px rgba(0,0,0,0.18) !important;
+        min-height: 100%;
+    }
+
+    .btb-bottom-sheet-handle {
+        display: flex;
+    }
+
+    /* Don't shift main content when bottom sheet opens */
+    .btb-main-pane--shifted {
+        flex: 1 1 auto !important;
+    }
+
+    /* Hide desktop resize handle */
+    .btb-resize-handle {
+        display: none !important;
+    }
+
+    /* Detail rows: stack label above value */
+    .btb-detail-card [style*="width: 160"] {
+        min-width: 120px !important;
+        width: 120px !important;
+    }
+
+    /* Results header wrap on mobile */
+    .btb-results-header {
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+    .btb-results-header > div:last-child {
+        flex-wrap: wrap;
+        gap: 8px !important;
+    }
+
+    /* Stat card compact on mobile with bottom sheet */
+    .btb-page-root .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+}
+
+/* ── Selected table row ─────────────────────────── */
+.btb-row-active > td {
+    background: #e6f4ff !important;
+}
+
+/* ── Skeleton / reveal transition ──────────────────
+   Pattern from transitions.dev
+   ─────────────────────────────────────────────── */
+.t-skel {
+    position: relative;
+    display: grid;
+    --pulse-count: 1;
+}
+.t-skel > * {
+    grid-area: 1 / 1;
+}
+.t-skel-skeleton,
+.t-skel-content {
+    position: absolute;
+    inset: 0;
+}
+.t-skel-skeleton {
+    transition: opacity 0.4s ease;
+    opacity: 1;
+}
+.t-skel-content {
+    transition: opacity 0.4s ease;
+    opacity: 0;
+}
+.t-skel.is-revealed .t-skel-skeleton {
+    opacity: 0;
+    pointer-events: none;
+}
+.t-skel.is-revealed .t-skel-content {
+    opacity: 1;
+}
+.t-skel.is-resetting .t-skel-skeleton,
+.t-skel.is-resetting .t-skel-content {
+    transition: none;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+}
+.t-skel-skeleton.is-pulsing {
+    animation: pulse 1.2s ease-in-out var(--pulse-count);
+}
+
+/* Override: detail panel uses natural (static) height so the
+   container sizes to content rather than collapsing to 0. */
+.btb-detail-card .t-skel-skeleton,
+.btb-detail-card .t-skel-content {
+    position: static;
+    inset: auto;
 }
