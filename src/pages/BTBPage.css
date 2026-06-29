@@ -17,11 +17,12 @@
     width: 100%;
     max-width: 1500px;
     margin: 0 auto;
-    transition: max-width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: max-width 1.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btb-page-root--expanded {
     max-width: 1500px;
+    transition: max-width 1.0s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ── Split-pane layout ──────────────────────────── */
@@ -36,7 +37,7 @@
 .btb-main-pane {
     flex: 1 1 auto;
     min-width: 520px;
-    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: all 1.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ── Split-screen independent scroll mode ───────── */
@@ -71,13 +72,14 @@
 
 .btb-main-pane--shifted {
     flex: 1 1 auto;
+    transition: all 1.0s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btb-detail-pane {
     flex: 0 0 0px;
     overflow: hidden;
-    transition: flex 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-                opacity 0.3s ease;
+    transition: flex 1.35s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 1.0s ease;
     opacity: 0;
     min-width: 0;
     position: sticky;
@@ -89,6 +91,8 @@
 .btb-detail-pane--open {
     opacity: 1;
     overflow-y: auto;
+    transition: flex 1.0s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.75s ease;
 }
 
 /* Resize handle between panes */
@@ -298,14 +302,15 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 5px 12px;
+    padding: 0 12px;
+    height: 30px;
     font-size: 13px;
     background: #fff;
     border: none;
     cursor: pointer;
     color: #595959;
     transition: background 0.2s ease, color 0.2s ease;
-    line-height: 1.5;
+    line-height: 1;
     font-family: inherit;
 }
 
@@ -531,7 +536,7 @@
         max-height: 78vh;
         overflow-y: auto;
         z-index: 100;
-        animation: btbSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        animation: btbSlideUp 0.675s cubic-bezier(0.22, 1, 0.36, 1);
         opacity: 1 !important;
     }
 
@@ -634,4 +639,59 @@
 .btb-detail-card .t-skel-content {
     position: static;
     inset: auto;
+}
+
+/* ── Full-card skeleton overlay ──────────────────── */
+.btb-card-skeleton-overlay {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    z-index: 10;
+    transition: opacity 0.5s ease;
+    pointer-events: all;
+    overflow: hidden;
+}
+
+.btb-card-skeleton-overlay.is-revealed {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.btb-card-skeleton-overlay.is-resetting {
+    transition: none;
+}
+
+@keyframes btbShimmer {
+    from { background-position: -200% 0; }
+    to   { background-position:  200% 0; }
+}
+
+.btb-skel-shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: btbShimmer 1.5s ease-in-out infinite;
+    border-radius: 4px;
+}
+
+/* ── Detail card scroll hint ─────────────────────── */
+.btb-scroll-hint {
+    position: fixed;
+    bottom: 28px;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    background: #fafafa;
+    color: #595959;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    animation: btbFadeIn 0.25s ease;
 }

@@ -15,7 +15,6 @@ import {
     PictureOutlined,
     GlobalOutlined,
     DownOutlined,
-    DownloadOutlined,
     ExpandOutlined,
     QuestionCircleOutlined,
 } from '@ant-design/icons';
@@ -225,10 +224,9 @@ const PERIOD_OPTIONS_CANCELLED = [
 ];
 
 const STATS = [
-    { label: 'Toplam Geçerli BTB', value: '1.840', link: null },
-    { key: 'added',                                 link: 'Görüntüle' },
-    { key: 'updated',                               link: 'Görüntüle' },
-    { key: 'cancelled',                             link: 'Görüntüle' },
+    { key: 'added',     link: 'Görüntüle' },
+    { key: 'updated',   link: 'Görüntüle' },
+    { key: 'cancelled', link: 'Görüntüle' },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -290,6 +288,7 @@ const BTBPage = () => {
     const [expandedImgHeight, setExpandedImgHeight] = useState(300);
     const [searchCardOpen, setSearchCardOpen]       = useState(true);
     const [searchCollapsed, setSearchCollapsed]     = useState(false);
+    const [detailScrollHint, setDetailScrollHint]   = useState(false);
 
     const resultsRef           = useRef(null);
     const detailWidthRef       = useRef(750);
@@ -298,6 +297,8 @@ const BTBPage = () => {
     const imgRef               = useRef(null);
     const imgWrapRef           = useRef(null);
     const headerRef            = useRef(null);
+    const detailSentinelRef    = useRef(null);
+    const detailPaneRef        = useRef(null);
 
     useEffect(() => {
         const onResize = () => setIsMobile(window.innerWidth <= 768);
@@ -314,6 +315,17 @@ const BTBPage = () => {
         ro.observe(el);
         return () => ro.disconnect();
     }, []);
+
+    useEffect(() => {
+        const sentinel = detailSentinelRef.current;
+        if (!sentinel || !selected) { setDetailScrollHint(false); return; }
+        const io = new IntersectionObserver(
+            ([entry]) => setDetailScrollHint(!entry.isIntersecting),
+            { threshold: 0 }
+        );
+        io.observe(sentinel);
+        return () => io.disconnect();
+    }, [selected, drawerOpen]);
 
     useEffect(() => {
         if (drawerOpen) { setCountryInHeader(false); return; }
@@ -368,6 +380,7 @@ const BTBPage = () => {
     const [colDurum, setColDurum] = useState(undefined);
 
     const openDetail = (rec) => {
+        if (detailPaneRef.current) detailPaneRef.current.scrollTop = 0;
         setSelected(rec);
         setDrawerOpen(true);
         setCollapseKeys([]);
@@ -518,7 +531,7 @@ const BTBPage = () => {
     // ─── Tab nav items ────────────────────────────────────────────────────────
 
     const TABS = [
-        { key: 'metin',    icon: <SearchOutlined />, label: 'BTB ile Ara' },
+        { key: 'metin',    icon: <SearchOutlined />, label: 'Ara' },
         { key: 'gelismis', icon: <ControlOutlined />, label: 'Detaylı Arama' },
     ];
 
@@ -687,7 +700,7 @@ const BTBPage = () => {
                 items={[{
                     key: 'genel-bakis',
                     label: <span style={{ fontSize: 15, fontWeight: 600, color: '#111827', letterSpacing: '-0.01em' }}>Genel Bakış</span>,
-                    extra: (
+                    extra: collapseKeys.includes('genel-bakis') ? (
                         <div onClick={e => e.stopPropagation()}>
                             <Dropdown
                                 menu={{
@@ -719,7 +732,7 @@ const BTBPage = () => {
                                 })()}
                             </Dropdown>
                         </div>
-                    ),
+                    ) : null,
                     children: (
                         <div className="btb-stat-segments" style={{ display: 'flex', flexWrap: drawerOpen ? 'wrap' : 'nowrap', margin: '-12px -16px -12px -16px' }}>
                             {STATS.map((s, i) => {
@@ -884,14 +897,14 @@ const BTBPage = () => {
                                     return (
                                         <button style={{
                                             display: 'inline-flex', alignItems: 'center', gap: 6,
-                                            padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+                                            padding: '0 10px', height: 30, borderRadius: 6, cursor: 'pointer',
                                             fontSize: 13, fontWeight: 400,
                                             background: '#fff', color: '#374151',
                                             border: '1px solid #d9d9d9',
                                             fontFamily: 'inherit', whiteSpace: 'nowrap',
                                         }}>
                                             {Flag && <Flag />}
-                                            {sel?.label}
+                                            {!drawerOpen && sel?.label}
                                             <DownOutlined style={{ fontSize: 10, color: '#8c8c8c' }} />
                                         </button>
                                     );
@@ -910,28 +923,30 @@ const BTBPage = () => {
                             >
                                 <button style={{
                                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                                    padding: '5px 8px', borderRadius: 6, cursor: 'pointer',
+                                    padding: '0 8px', height: 30, borderRadius: 6, cursor: 'pointer',
                                     color: '#595959', background: '#fff', border: '1px solid #d9d9d9',
                                     fontFamily: 'inherit',
                                 }}>
                                     <SortIcon />
                                 </button>
                             </Dropdown>
-                            <button
-                                onClick={() => setCompactRows(c => !c)}
-                                style={{
-                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                                    padding: '5px 8px', borderRadius: 6, cursor: 'pointer',
-                                    color: compactRows ? '#1677ff' : '#595959',
-                                    background: compactRows ? '#f0f7ff' : '#fff',
-                                    border: compactRows ? '1px solid #1677ff' : '1px solid #d9d9d9',
-                                    fontFamily: 'inherit',
-                                    transition: 'all 0.15s',
-                                }}
-                                title={compactRows ? 'Satırları büyüt' : 'Satırları küçült'}
-                            >
-                                <ColumnHeightOutlined />
-                            </button>
+                            {viewMode !== 'kart' && (
+                                <button
+                                    onClick={() => setCompactRows(c => !c)}
+                                    style={{
+                                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                        padding: '0 8px', height: 30, borderRadius: 6, cursor: 'pointer',
+                                        color: compactRows ? '#1677ff' : '#595959',
+                                        background: compactRows ? '#f0f7ff' : '#fff',
+                                        border: compactRows ? '1px solid #1677ff' : '1px solid #d9d9d9',
+                                        fontFamily: 'inherit',
+                                        transition: 'all 0.15s',
+                                    }}
+                                    title={compactRows ? 'Satırları büyüt' : 'Satırları küçült'}
+                                >
+                                    <ColumnHeightOutlined />
+                                </button>
+                            )}
                             <div className="btb-view-toggle">
                                 <button className={`btb-view-btn${viewMode === 'kart' ? ' active' : ''}`} onClick={() => setViewMode('kart')}>
                                     <AppstoreOutlined /> Kart
@@ -963,10 +978,10 @@ const BTBPage = () => {
                                                     )}
                                                 </div>
                                                 <div style={{ flex: 1, padding: '10px 12px', minWidth: 0 }}>
-                                                    <Text style={{ fontSize: 12, fontFamily: 'Inter, sans-serif', fontWeight: 400, display: 'block', color: '#595959' }}>{rec.gtip}</Text>
+                                                    <Text style={{ fontSize: 12, fontFamily: 'Inter, sans-serif', fontWeight: 500, display: 'block', color: '#262626' }}>{rec.btbNo}</Text>
                                                     <Text style={{ fontSize: 13, color: '#1d3557', display: 'block', marginTop: 2, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rec.tanim}</Text>
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                                                        <Text style={{ fontSize: 11, color: '#8c8c8c' }}>{rec.refNo}</Text>
+                                                        <Text style={{ fontSize: 11, color: '#8c8c8c' }}>{rec.gtip}</Text>
                                                         <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0 }}>
                                                             <span style={{ width: 7, height: 7, borderRadius: '50%', background: statusColor(rec.durum), display: 'inline-block' }} />
                                                             <Text style={{ fontSize: 11, color: statusColor(rec.durum) }}>{rec.durum}</Text>
@@ -994,9 +1009,9 @@ const BTBPage = () => {
                                                 </div>
                                             }
                                             onClick={() => openDetail(rec)}>
-                                            <Text style={{ fontSize: 13, fontFamily: 'Inter, sans-serif', fontWeight: 400, display: 'block' }}>{rec.gtip}</Text>
+                                            <Text style={{ fontSize: 13, fontFamily: 'Inter, sans-serif', fontWeight: 500, display: 'block', color: '#262626' }}>{rec.btbNo}</Text>
                                             <Text style={{ fontSize: 12, color: '#1d3557', display: 'block', marginTop: 2, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rec.tanim}</Text>
-                                            <Text style={{ fontSize: 11, color: '#8c8c8c', display: 'block', marginBottom: 6 }}>{rec.refNo}</Text>
+                                            <Text style={{ fontSize: 11, color: '#8c8c8c', display: 'block', marginBottom: 6 }}>{rec.gtip}</Text>
                                             <Tooltip title={rec.durum}>
                                                 <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
                                                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor(rec.durum), display: 'inline-block', flexShrink: 0 }} />
@@ -1055,18 +1070,20 @@ const BTBPage = () => {
                             <circle cx="6" cy="12" r="1.5" fill="#8c8c8c"/>
                         </svg>
                     </div>
-                    <Tooltip title="Panel genişliğini sıfırla" placement="left">
-                        <button
-                            className="btb-resize-reset"
-                            onMouseDown={e => e.stopPropagation()}
-                            onClick={() => { setDetailWidth(750); detailWidthRef.current = 750; }}
-                        >
-                            <RedoOutlined />
-                        </button>
-                    </Tooltip>
+                    {detailWidth !== 750 && (
+                        <Tooltip title="Panel genişliğini sıfırla" placement="left">
+                            <button
+                                className="btb-resize-reset"
+                                onMouseDown={e => e.stopPropagation()}
+                                onClick={() => { setDetailWidth(750); detailWidthRef.current = 750; }}
+                            >
+                                <RedoOutlined />
+                            </button>
+                        </Tooltip>
+                    )}
                 </div>
             )}
-            <div className={`btb-detail-pane${drawerOpen ? ' btb-detail-pane--open' : ''}`}
+            <div ref={detailPaneRef} className={`btb-detail-pane${drawerOpen ? ' btb-detail-pane--open' : ''}`}
                  style={{
                      ...(drawerOpen && !isMobile ? { flex: `0 0 ${detailWidth}px` } : undefined),
                      ...(detailImgExpanded ? { zIndex: 29 } : undefined),
@@ -1078,6 +1095,24 @@ const BTBPage = () => {
                                 <div style={{ width: 40, height: 4, borderRadius: 2, background: '#d9d9d9' }} />
                             </div>
                         )}
+
+                        {/* Full-card skeleton overlay */}
+                        <div className={`btb-card-skeleton-overlay${detailRevealed ? ' is-revealed' : ''}${detailResetting ? ' is-resetting' : ''}`}>
+                            <div style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f0f0' }}>
+                                <div className="btb-skel-shimmer" style={{ flex: 1, height: 18 }} />
+                                <div className="btb-skel-shimmer" style={{ width: 28, height: 28, flexShrink: 0 }} />
+                            </div>
+                            <div className="btb-skel-shimmer" style={{ width: '100%', height: 220, borderRadius: 0 }} />
+                            <div style={{ padding: 24 }}>
+                                {[160, 80, 120, 100, 140, 60, 110, 90].map((w, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'center', padding: '10px 0', borderBottom: i < 7 ? '1px solid #f5f5f5' : 'none', gap: 12 }}>
+                                        <div className="btb-skel-shimmer" style={{ width: 130, height: 13, flexShrink: 0 }} />
+                                        <div className="btb-skel-shimmer" style={{ width: w, height: 13 }} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                         <div style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f0f0f0', overflow: 'hidden' }}>
                             <Text ellipsis={{ tooltip: selected.tanim }} style={{ fontSize: 15, fontWeight: 500, fontFamily: 'Inter, sans-serif', color: 'rgba(0,0,0,0.88)', flex: 1, minWidth: 0 }}>
                                 {selected.tanim}
@@ -1213,23 +1248,30 @@ const BTBPage = () => {
                                         </div>
                                     )}
 
-                                    <div style={{ marginTop: 20, paddingBottom: 4 }}>
-                                        <Button
-                                            icon={<DownloadOutlined />}
-                                            style={{ width: '100%', height: 38, fontSize: 13, borderRadius: 6 }}
-                                            onClick={() => {}}
-                                        >
-                                            PDF İndir
-                                        </Button>
-                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div ref={detailSentinelRef} />
                     </div>
                 )}
             </div>
         </div>
         </div>
+
+        {/* Scroll hint */}
+        {drawerOpen && detailScrollHint && (
+            <div
+                className="btb-scroll-hint"
+                style={{
+                    left: isMobile
+                        ? '50%'
+                        : `calc(100vw - ${detailWidth / 2 + 16}px)`,
+                }}
+            >
+                <DownOutlined style={{ fontSize: 11 }} />
+                Kaydır
+            </div>
+        )}
         </>
     );
 };
