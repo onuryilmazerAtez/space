@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import dayjs from 'dayjs';
 import {
     Card, Typography, Row, Col, Input, Select, Button, Table, Tag,
     Switch, Checkbox, DatePicker, Dropdown, Segmented, Collapse,
@@ -375,8 +376,8 @@ const BTBPage = () => {
     // Table column filters
     const [colBtb, setColBtb]     = useState('');
     const [colGtip, setColGtip]   = useState('');
-    const [colTanim, setColTanim] = useState(undefined);
-    const [colTarih, setColTarih] = useState('');
+    const [colTanim, setColTanim] = useState('');
+    const [colTarih, setColTarih] = useState(null);
     const [colDurum, setColDurum] = useState(undefined);
 
     const openDetail = (rec) => {
@@ -428,7 +429,13 @@ const BTBPage = () => {
             if (country === 'uk' && !r.btbNo.startsWith('GB'))        return false;
             if (colBtb    && !r.btbNo.toLowerCase().includes(colBtb.toLowerCase()))     return false;
             if (colGtip   && !r.gtip.toLowerCase().includes(colGtip.toLowerCase()))     return false;
-            if (colTanim  && r.tanim !== colTanim)   return false;
+            if (colTanim  && !r.tanim.toLowerCase().includes(colTanim.toLowerCase()))   return false;
+            if (colTarih?.[0] && colTarih?.[1]) {
+                const [startStr, endStr] = r.tarih.split('—').map(s => s.trim());
+                const recStart = dayjs(startStr, 'MM.YYYY');
+                const recEnd   = dayjs(endStr,   'MM.YYYY');
+                if (colTarih[1].isBefore(recStart, 'month') || colTarih[0].isAfter(recEnd, 'month')) return false;
+            }
             if (colDurum  && r.durum !== colDurum)   return false;
             return true;
         })
@@ -471,7 +478,7 @@ const BTBPage = () => {
             render: v => <Text style={{ fontSize: 13, fontFamily: 'Inter, sans-serif', fontWeight: 400, whiteSpace: 'nowrap' }}>{v}</Text>,
         },
         {
-            title: (<div><div style={TH}>Eşya Tanımı</div><Select size="small" placeholder="Seçiniz" value={colTanim} onChange={setColTanim} allowClear style={{ marginTop: 4, width: '100%' }} options={[...new Set(MOCK_DATA.map(r => r.tanim))].map(t => ({ value: t, label: t }))} /></div>),
+            title: (<div><div style={TH}>Eşya Tanımı</div><Input size="small" placeholder="Giriniz" value={colTanim} onChange={e => setColTanim(e.target.value)} style={{ marginTop: 4 }} /></div>),
             dataIndex: 'tanim', key: 'tanim', ellipsis: true,
             render: (v, record) => (
                 <Tooltip title={record.tanimUzun} styles={{ root: { maxWidth: 360 } }} placement="topLeft">
@@ -480,7 +487,7 @@ const BTBPage = () => {
             ),
         },
         {
-            title: (<div><div style={TH}>Başlangıç - Bitiş Tarihi</div><Input size="small" placeholder="Giriniz" value={colTarih} onChange={e => setColTarih(e.target.value)} style={{ marginTop: 4 }} /></div>),
+            title: (<div><div style={TH}>Başlangıç - Bitiş Tarihi</div><DatePicker.RangePicker size="small" picker="month" format="MM.YYYY" value={colTarih} onChange={setColTarih} style={{ marginTop: 4 }} placeholder={['Başlangıç', 'Bitiş']} /></div>),
             dataIndex: 'tarih', key: 'tarih', width: 180,
             render: v => <Text style={{ fontSize: 12, color: '#8c8c8c' }}>{v}</Text>,
         },
