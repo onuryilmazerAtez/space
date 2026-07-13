@@ -737,11 +737,11 @@ const CREDITS_PER_CHAT = 50;
 const PACKAGE_NAME = "Premium Plus Pack";
 
 
-function ChatLimitWarningBanner({ remaining, onNewChat, onBuyCredits }) {
+function ChatLimitWarningBanner({ remaining, onNewChat, onClose }) {
     return (
         <div style={{
-            background: "linear-gradient(90deg, #fffbe6, #fff7cc)",
-            border: "1px solid #ffe58f",
+            background: "#fffbeb",
+            border: "1px solid #fde68a",
             borderRadius: 6, padding: "12px 16px",
             animation: "bannerSlideUp 0.35s cubic-bezier(0.22,1,0.36,1) both",
             overflow: "hidden",
@@ -749,27 +749,50 @@ function ChatLimitWarningBanner({ remaining, onNewChat, onBuyCredits }) {
         }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                    <path d="M12 2L2 20h20L12 2z" fill="#faad14" />
-                    <path d="M12 9v5" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                    <circle cx="12" cy="17" r="1" fill="white" />
+                    <path d="M12 2L2 20h20L12 2z" fill="#fbbf24" />
+                    <path d="M12 9v5" stroke="#fffbeb" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="12" cy="17" r="1" fill="#fffbeb" />
                 </svg>
-                <span style={{ fontSize: 13, fontWeight: 500, color: "#3d2200", fontFamily: ds.fonts.family }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: "#92400e", fontFamily: ds.fonts.family }}>
                     Bu sohbet sona yaklaşıyor
                 </span>
             </div>
-            <button
-                onClick={onBuyCredits}
-                style={{
-                    background: "#faad14", color: "white", border: "none",
-                    borderRadius: 6, padding: "5px 13px", fontSize: 12, fontWeight: 500,
-                    cursor: "pointer", fontFamily: ds.fonts.family, whiteSpace: "nowrap",
-                    transition: "opacity 0.15s", flexShrink: 0,
-                }}
-                onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-            >
-                Ek Paket Satın Alın
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                <button
+                    onClick={onNewChat}
+                    style={{
+                        background: "#fff", color: "#374151", border: "1px solid #d1d5db",
+                        borderRadius: 6, padding: "8px 16px", fontSize: 13, fontWeight: 500,
+                        cursor: "pointer", fontFamily: ds.fonts.family, whiteSpace: "nowrap",
+                        display: "flex", alignItems: "center", gap: 6,
+                        transition: "background 0.15s, border-color 0.15s",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "#f9fafb"; e.currentTarget.style.borderColor = "#9ca3af"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.borderColor = "#d1d5db"; }}
+                >
+                    <svg width="12" height="12" viewBox="0 0 18 18" fill="none">
+                        <path d="M9 3v12M3 9h12" stroke="#374151" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    Yeni Sohbet Aç
+                </button>
+                <button
+                    onClick={onClose}
+                    aria-label="Kapat"
+                    style={{
+                        background: "transparent", border: "none", cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        width: 24, height: 24, padding: 0, borderRadius: 4, color: "#b45309",
+                        transition: "background 0.15s",
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.06)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
         </div>
     );
 }
@@ -777,37 +800,39 @@ function ChatLimitWarningBanner({ remaining, onNewChat, onBuyCredits }) {
 function ChatLockedCard({ onNewChat, canStart, onBuyCredits }) {
     return (
         <div style={{
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            display: "flex", flexDirection: "row", alignItems: "center",
             background: "#fff",
             border: "1px solid #e5e7eb",
-            borderRadius: 8, padding: "22px 24px 20px",
-            gap: 8, textAlign: "center",
+            borderRadius: 8, padding: "14px 20px",
+            gap: 12,
             boxShadow: "0px 3px 6px 0px rgba(0,0,0,0.08)",
             animation: "bannerSlideUp 0.4s cubic-bezier(0.22,1,0.36,1) both",
             marginBottom: 4,
         }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#374151", fontFamily: ds.fonts.family }}>Bu sohbet kilitlendi</div>
-            <div style={{ fontSize: 13, color: "#6b7280", fontFamily: ds.fonts.family, maxWidth: 380, lineHeight: 1.55 }}>
-                3 sorgu limitine ulaşıldı. Sohbet sistem tarafından kilitlendi. Görüşmeye devam etmek için yeni bir sohbet başlatın.
+            <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#374151", fontFamily: ds.fonts.family }}>Sınıflandırma tamamlandı.</div>
+                <div style={{ fontSize: 13, color: "#6b7280", fontFamily: ds.fonts.family, lineHeight: 1.4, whiteSpace: "nowrap" }}>
+                    Ek sorularınız veya farklı bir ürün için yeni bir sohbet başlatabilirsiniz.
+                </div>
             </div>
-            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+            <div style={{ display: "flex", gap: 8, marginLeft: "auto", flexShrink: 0 }}>
                 {canStart && (
                     <button
                         onClick={onNewChat}
                         style={{
                             background: "#1a73e8", color: "white", border: "none",
-                            borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 400,
+                            borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 500,
                             cursor: "pointer", fontFamily: ds.fonts.family,
-                            display: "flex", alignItems: "center", gap: 8, transition: "background 0.15s",
+                            display: "flex", alignItems: "center", gap: 6, transition: "background 0.15s",
                         }}
                         onMouseEnter={e => e.currentTarget.style.background = "#1557b0"}
                         onMouseLeave={e => e.currentTarget.style.background = "#1a73e8"}
                     >
-                        <svg width="13" height="13" viewBox="0 0 18 18" fill="none">
+                        <svg width="12" height="12" viewBox="0 0 18 18" fill="none">
                             <path d="M9 3v12M3 9h12" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
                         </svg>
                         Yeni Sohbet Aç
@@ -817,15 +842,15 @@ function ChatLockedCard({ onNewChat, canStart, onBuyCredits }) {
                     onClick={onBuyCredits}
                     style={{
                         background: "white", color: "#374151", border: "1px solid #d1d5db",
-                        borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 400,
+                        borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 500,
                         cursor: "pointer", fontFamily: ds.fonts.family,
-                        display: "flex", alignItems: "center", gap: 8, transition: "background 0.15s, border-color 0.15s",
+                        display: "flex", alignItems: "center", gap: 6, transition: "background 0.15s, border-color 0.15s",
                     }}
                     onMouseEnter={e => { e.currentTarget.style.background = "#f9fafb"; e.currentTarget.style.borderColor = "#9ca3af"; }}
                     onMouseLeave={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.borderColor = "#d1d5db"; }}
                 >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+                    <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 2C14.4183 2 18 5.58172 18 10C18 11.1987 17.8724 11.6314 17.4368 12.4614C17.3082 12.7064 17.0171 12.8163 16.7565 12.7233C16.4433 12.6114 16.2996 12.2548 16.4159 11.9432C16.6424 11.3369 16.725 10.7922 16.725 10C16.725 6.28599 13.714 3.275 10 3.275C6.28599 3.275 3.275 6.28599 3.275 10C3.275 13.714 6.28599 16.725 10 16.725C10.8541 16.725 11.4107 16.691 12.0734 16.4434C12.3338 16.3461 12.6313 16.3929 12.8279 16.5895C13.1382 16.8998 13.0634 17.425 12.6545 17.5845C11.8392 17.9027 11.0522 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2ZM14.9098 12.8571C15.0225 12.5845 15.3998 12.5845 15.5125 12.8571L15.6741 13.2482C15.9506 13.9152 16.4668 14.4477 17.1152 14.7357L17.5741 14.9402C17.8371 15.0567 17.837 15.4388 17.5741 15.5554L17.0875 15.7714C16.4579 16.0524 15.9513 16.5657 15.6696 17.2107L15.5107 17.5723C15.3955 17.8373 15.0292 17.8373 14.9134 17.5723L14.7554 17.2107C14.4737 16.5656 13.9672 16.0524 13.3348 15.7714L12.8482 15.5554C12.5854 15.4388 12.5854 15.0568 12.8482 14.9402L13.3071 14.7357C13.9555 14.4477 14.4717 13.9152 14.7482 13.2482L14.9098 12.8571ZM9.85148 5.14286C10.0501 5.14286 10.249 5.25323 10.3409 5.47473L10.8361 6.66745C11.2631 7.69686 12.0594 8.51836 13.0599 8.96276L14.3621 9.54058C14.7893 9.73037 14.7889 10.3517 14.3621 10.5413L13.0186 11.1385C12.0429 11.5714 11.2609 12.3638 10.826 13.3588L10.3375 14.4774C10.2433 14.6924 10.0471 14.8 9.85148 14.8C9.65588 14.7999 9.46072 14.6923 9.36715 14.4774L8.8786 13.3588C8.44381 12.3631 7.66098 11.5714 6.68521 11.1385L5.34172 10.5413C4.91419 10.3516 4.91419 9.7302 5.34172 9.54058L6.6431 8.96276C7.64414 8.51837 8.44008 7.69624 8.86765 6.66745L9.36293 5.47473C9.45476 5.25341 9.65297 5.14292 9.85148 5.14286ZM9.85148 7.423C9.28989 8.58607 8.3558 9.50709 7.18976 10.0409C8.34371 10.5572 9.27842 11.4558 9.85148 12.5923C10.4245 11.4558 11.3593 10.5564 12.5132 10.0401C11.3473 9.50683 10.413 8.58598 9.85148 7.423Z" fill="currentColor" />
                     </svg>
                     Kredi Al
                 </button>
@@ -983,7 +1008,7 @@ export default function TariffAiPage() {
     const [input, setInput] = useState("");
     const [isThinking, setIsThinking] = useState(false);
     const [, setThinkingSteps] = useState([]);
-    const inputCollapsed = false;
+    const [inputCollapsed, setInputCollapsed] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [showAttachMenu, setShowAttachMenu] = useState(false);
     const [linkInputVisible, setLinkInputVisible] = useState(false);
@@ -992,6 +1017,7 @@ export default function TariffAiPage() {
     const [userCredits, setUserCredits] = useState(TOTAL_CREDITS);
     const [chatCreditsUsed, setChatCreditsUsed] = useState(0);
     const [lockedSessionIds, setLockedSessionIds] = useState(new Set());
+    const [limitWarningDismissed, setLimitWarningDismissed] = useState(false);
     const chatEndRef = useRef(null);
     const inputRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -1000,7 +1026,7 @@ export default function TariffAiPage() {
     const chatCreditsRemaining = Math.max(0, CREDITS_PER_CHAT - chatCreditsUsed);
     const isChatLocked = chatCreditsUsed >= CREDITS_PER_CHAT;
     // Warn when ≤10% of reserved credits remain
-    const isChatNearLimit = !isChatLocked && chatCreditsRemaining / CREDITS_PER_CHAT <= 0.10;
+    const isChatNearLimit = !isChatLocked && !limitWarningDismissed && chatCreditsRemaining / CREDITS_PER_CHAT <= 0.10;
     // All credits exhausted: global credits gone AND reserved credits fully used
     const isOutOfCredits = userCredits <= 0 && isChatLocked;
 
@@ -1073,6 +1099,7 @@ export default function TariffAiPage() {
         }
         setUserCredits(prev => prev - CREDITS_PER_CHAT);
         setChatCreditsUsed(0);
+        setLimitWarningDismissed(false);
         const id = sessionCounter++;
         const tool = tools.find(t => t.id === (toolId || selectedTool));
         const title = tool ? tool.title : "Yeni Sohbet";
@@ -1258,6 +1285,8 @@ export default function TariffAiPage() {
         .chat-scroll::-webkit-scrollbar-thumb { background:#dadce0; border-radius:3px; }
         .tariff-textarea { resize:none; outline:none; font-family:'Inter','Google Sans',sans-serif; }
         .tariff-textarea:focus { border-color: #1a73e8 !important; box-shadow: 0 0 0 2px rgba(26,115,232,0.12); }
+        .tariff-input-minimize-btn { opacity: 0; transition: opacity 0.15s; }
+        .tariff-input-card:hover .tariff-input-minimize-btn { opacity: 1; }
         code { background:#f1f3f4; padding:2px 6px; border-radius:4px; font-size:13px; color:#3949ab; }
         strong { color: #202124; }
         ul, ol { padding-left: 20px; margin: 6px 0; }
@@ -1265,7 +1294,7 @@ export default function TariffAiPage() {
       `}</style>
 
             {/* Left sidebar */}
-            <ChatSidebar collapsed={sidebarCollapsed} onCollapse={() => setSidebarCollapsed(c => !c)} sessions={sessions} activeId={activeSessionId} onNew={handleNewChat} onSelect={(id) => { setActiveSessionId(id); setMessages([]); setChatCreditsUsed(lockedSessionIds.has(id) ? CREDITS_PER_CHAT : 0); }} userCredits={userCredits} totalCredits={TOTAL_CREDITS} reservedCredits={activeSessionId != null && !lockedSessionIds.has(activeSessionId) ? CREDITS_PER_CHAT : 0} chatCreditsUsed={chatCreditsUsed} lockedSessionIds={lockedSessionIds} packageName={PACKAGE_NAME} />
+            <ChatSidebar collapsed={sidebarCollapsed} onCollapse={() => setSidebarCollapsed(c => !c)} sessions={sessions} activeId={activeSessionId} onNew={handleNewChat} onSelect={(id) => { setActiveSessionId(id); setMessages([]); setChatCreditsUsed(lockedSessionIds.has(id) ? CREDITS_PER_CHAT : 0); setLimitWarningDismissed(false); }} userCredits={userCredits} totalCredits={TOTAL_CREDITS} reservedCredits={activeSessionId != null && !lockedSessionIds.has(activeSessionId) ? CREDITS_PER_CHAT : 0} chatCreditsUsed={chatCreditsUsed} lockedSessionIds={lockedSessionIds} packageName={PACKAGE_NAME} />
 
             {/* Chat area wrapper */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
@@ -1406,7 +1435,7 @@ export default function TariffAiPage() {
                     <div style={{ flexShrink: 0, padding: "0 24px 0", marginBottom: -3, zIndex: 10, position: "relative" }}>
                         <div style={{ maxWidth: 780, margin: "0 auto", width: "85%" }}>
                             {isOutOfCredits && <div style={{ width: "95%", margin: "0 auto" }}><NoCreditBanner onBuyCredits={handleBuyCredits} /></div>}
-                            {!isOutOfCredits && isChatNearLimit && <div style={{ width: "95%", margin: "0 auto" }}><ChatLimitWarningBanner remaining={chatCreditsRemaining} onNewChat={handleNewChat} onBuyCredits={handleBuyCredits} /></div>}
+                            {!isOutOfCredits && isChatNearLimit && <div style={{ width: "95%", margin: "0 auto" }}><ChatLimitWarningBanner remaining={chatCreditsRemaining} onNewChat={handleNewChat} onClose={() => setLimitWarningDismissed(true)} /></div>}
                         </div>
                     </div>
                 )}
@@ -1421,13 +1450,29 @@ export default function TariffAiPage() {
                         {/* Chat locked — replace input with locked card */}
                         {isChatLocked && <ChatLockedCard onNewChat={handleNewChat} canStart={!isOutOfCredits} onBuyCredits={handleBuyCredits} />}
 
+                        {/* Collapsed input — compact bar to re-expand */}
+                        {!isChatLocked && inputCollapsed && (
+                            <button
+                                onClick={() => setInputCollapsed(false)}
+                                style={{
+                                    width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                                    background: "#fff", borderRadius: "8px", padding: "10px 16px",
+                                    boxShadow: "0px 3px 6px 0px rgba(0,0,0,0.12), 0px 6px 16px 0px rgba(0,0,0,0.08)",
+                                    border: "1px solid rgba(0, 0, 0, 0.1)", cursor: "pointer",
+                                    fontFamily: ds.fonts.family, fontSize: 13, color: ds.colors.textMuted,
+                                    animation: "bannerSlideUp 0.3s cubic-bezier(0.22,1,0.36,1) both",
+                                }}
+                            >
+                                <span>Mesaj alanı simge durumunda</span>
+                                <span style={{ display: "flex", transform: "rotate(180deg)" }}><ChevronDown /></span>
+                            </button>
+                        )}
+
                         {/* Input box */}
-                        {!isChatLocked && <div style={{
+                        {!isChatLocked && !inputCollapsed && <div style={{
                             overflow: "visible",
-                            maxHeight: inputCollapsed ? 0 : 500,
-                            opacity: inputCollapsed ? 0 : 1,
-                            transition: "max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
                             position: "relative",
+                            animation: "bannerSlideUp 0.3s cubic-bezier(0.22,1,0.36,1) both",
                         }}>
                             {/* Blur overlay when credits exhausted */}
                             {isOutOfCredits && (
@@ -1441,13 +1486,31 @@ export default function TariffAiPage() {
                                     pointerEvents: "none",
                                 }} />
                             )}
-                            <div style={{
+                            <div className="tariff-input-card" style={{
                                 background: "#fff",
                                 borderRadius: "8px",
                                 boxShadow: "0px 3px 6px 0px rgba(0,0,0,0.12), 0px 6px 16px 0px rgba(0,0,0,0.08), 0px 9px 28px 0px rgba(0,0,0,0.05)",
                                 border: "1px solid rgba(0, 0, 0, 0.1)",
                                 overflow: "visible",
+                                position: "relative",
                             }}>
+                                {/* Minimize button — sits flush on the top border, right corner, revealed on hover */}
+                                <button
+                                    onClick={() => setInputCollapsed(true)}
+                                    aria-label="Mesaj alanını simge durumuna küçült"
+                                    className="tariff-input-minimize-btn"
+                                    style={{
+                                        position: "absolute", top: -13, right: 16, zIndex: 25,
+                                        width: 28, height: 14, display: "flex", alignItems: "center", justifyContent: "center",
+                                        background: "#fff", border: "1px solid rgba(0,0,0,0.1)", borderBottom: "none",
+                                        borderRadius: "6px 6px 0 0", cursor: "pointer",
+                                        boxShadow: "0px -2px 4px 0px rgba(0,0,0,0.06)",
+                                    }}
+                                >
+                                    <span style={{ display: "flex", transform: "scale(0.7) translateY(2px)" }}>
+                                        <ChevronDown />
+                                    </span>
+                                </button>
 
                                 {/* Link input */}
                                 {linkInputVisible && (

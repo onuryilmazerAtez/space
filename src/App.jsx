@@ -13,6 +13,7 @@ import RaporDeneme from './pages/RaporDeneme';
 import MyCompaniesPage from './pages/MyCompaniesPage';
 import BTBPage from './pages/BTBPage';
 import KpiReportPage from './pages/KpiReportPage';
+import TariffLandingPage from './pages/TariffLandingPage';
 
 function App() {
     return (
@@ -31,6 +32,7 @@ function App() {
                         <Route path="/firmalarim" element={<MyCompaniesPage />} />
                         <Route path="/btb" element={<BTBPage />} />
                         <Route path="/reports/kpi" element={<KpiReportPage />} />
+                        <Route path="/tariff" element={<TariffLandingPage />} />
                     </Routes>
                 </MainLayout>
             </Router>

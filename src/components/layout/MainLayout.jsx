@@ -28,6 +28,7 @@ import {
     QuestionCircleOutlined,
     BugOutlined,
     PhoneOutlined,
+    GlobalOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -95,6 +96,7 @@ const MainLayout = ({ children }) => {
     const isTariffAi = location.pathname === '/tariff-ai';
     const isBtb = location.pathname === '/btb';
     const isKpiReport = location.pathname === '/reports/kpi';
+    const isTariff = location.pathname === '/tariff';
 
     const menuItems = [
         {
@@ -134,6 +136,11 @@ const MainLayout = ({ children }) => {
             key: '/btb',
             icon: <AuditOutlined />,
             label: 'BTB',
+        },
+        {
+            key: '/tariff',
+            icon: <GlobalOutlined />,
+            label: 'Tariff',
         },
         {
             key: '/settings',
@@ -346,8 +353,8 @@ const MainLayout = ({ children }) => {
                 </Header>
                 <Content
                     style={{
-                        margin: isTariffAi || isBtb || isKpiReport ? 0 : '24px 16px',
-                        padding: isTariffAi || isBtb || isKpiReport ? 0 : 24,
+                        margin: isTariffAi || isBtb || isKpiReport || isTariff ? 0 : '24px 16px',
+                        padding: isTariffAi || isBtb || isKpiReport || isTariff ? 0 : 24,
                         minHeight: 280,
                         overflowY: isTariffAi ? 'hidden' : 'auto',
                         flex: 1,
