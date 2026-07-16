@@ -909,3 +909,341 @@
 .tariff-stat-item:nth-child(2) { animation-delay: 0.4s; }
 .tariff-stat-item:nth-child(3) { animation-delay: 0.5s; }
 .tariff-stat-item:nth-child(4) { animation-delay: 0.6s; }
+
+/* ---------- SELECTION TOOLTIP & DEFINE CARD ---------- */
+.tariff-select-tooltip {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 4.5px;
+  padding: 6px 8px 6px 10px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.14), 0 0 1px rgba(0, 0, 0, 0.1);
+  transform: translate(-50%, calc(-100% - 10px));
+  animation: tariffTooltipPop 0.15s ease-out both;
+}
+
+.tariff-select-tooltip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  transform: translateX(-50%) rotate(45deg);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+  z-index: -1;
+}
+
+@keyframes tariffTooltipPop {
+  from { opacity: 0; transform: translate(-50%, calc(-100% - 4px)) scale(0.92); }
+  to { opacity: 1; transform: translate(-50%, calc(-100% - 10px)) scale(1); }
+}
+
+.tariff-select-tooltip-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tariff-select-tooltip-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.tariff-select-tooltip-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: #1d2939;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.tariff-select-tooltip-btn:hover {
+  background: #f0f5ff;
+  color: #1677ff;
+}
+
+/* Define card */
+.tariff-define-card-wrap {
+  position: fixed;
+  z-index: 1001;
+  transform: translate(-50%, 12px);
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  animation: tariffCardPop 0.2s ease-out both;
+}
+
+@keyframes tariffCardPop {
+  from { opacity: 0; transform: translate(-50%, 4px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 12px) scale(1); }
+}
+
+.tariff-define-card {
+  position: relative;
+  border-radius: 8px;
+  background: #fff;
+  padding: 2px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14), 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.tariff-define-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  padding: 2px;
+  background: linear-gradient(120deg, #D912F0, #219DFF, #34D399, #D912F0);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: tariffGradientMove 5s linear infinite, tariffBorderBlink 1.8s ease-in-out infinite;
+}
+
+@keyframes tariffGradientMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+@keyframes tariffBorderBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.tariff-define-card-inner {
+  position: relative;
+  background: #fff;
+  border-radius: 6px;
+  padding: 14px 16px 16px;
+}
+
+.tariff-define-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tariff-define-card-header svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.tariff-define-card-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d2939;
+}
+
+.tariff-define-card-close {
+  border: none;
+  background: transparent;
+  color: #98a2b3;
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.tariff-define-card-close:hover {
+  background: #f2f4f7;
+  color: #475467;
+}
+
+.tariff-define-card-term {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1677ff;
+  background: #f0f5ff;
+  border-radius: 6px;
+  padding: 4px 8px;
+  display: inline-block;
+  margin-bottom: 8px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tariff-define-card-body {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #344054;
+  min-height: 20px;
+}
+
+.tariff-define-card-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #98a2b3;
+  font-size: 13px;
+}
+
+.tariff-define-card-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #e4e7ec;
+  border-top-color: #1677ff;
+  border-radius: 50%;
+  animation: tariffSpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes tariffSpin {
+  to { transform: rotate(360deg); }
+}
+
+.tariff-define-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.tariff-define-card-footer-label {
+  font-size: 12px;
+  color: #98a2b3;
+}
+
+.tariff-define-card-rate-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tariff-define-rate-btn {
+  border: 1px solid #e4e7ec;
+  background: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #667085;
+  transition: all 0.15s;
+}
+
+.tariff-define-rate-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.tariff-define-rate-btn:hover {
+  border-color: #1677ff;
+  color: #1677ff;
+  background: #f0f5ff;
+}
+
+.tariff-define-rate-btn.active-like {
+  border-color: #12b76a;
+  color: #12b76a;
+  background: #ecfdf3;
+}
+
+.tariff-define-rate-btn.active-dislike {
+  border-color: #f04438;
+  color: #f04438;
+  background: #fef3f2;
+}
+
+.tariff-define-feedback {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f2f5;
+  animation: tariffFadeUp 0.2s ease-out both;
+}
+
+.tariff-define-feedback-label {
+  font-size: 12px;
+  color: #475467;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.tariff-define-feedback-input {
+  width: 100%;
+  min-height: 56px;
+  resize: none;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12.5px;
+  color: #1d2939;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.tariff-define-feedback-input:focus {
+  border-color: #1677ff;
+}
+
+.tariff-define-feedback-submit {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tariff-define-feedback-submit button {
+  border: none;
+  background: #1677ff;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tariff-define-feedback-submit button:disabled {
+  background: #d0d5dd;
+  cursor: not-allowed;
+}
+
+.tariff-define-feedback-submit button:not(:disabled):hover {
+  background: #0e5fd1;
+}
+
+.tariff-define-feedback-thanks {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f2f5;
+  font-size: 12.5px;
+  color: #12b76a;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

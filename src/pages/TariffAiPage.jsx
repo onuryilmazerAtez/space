@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ExclamationCircleFilled } from "@ant-design/icons";
 import { Progress, Tooltip } from "antd";
 import { FileText, Link2, ImageIcon, Plus, X } from "lucide-react";
@@ -146,6 +147,38 @@ const PremiumPackIcon = ({ size = 16 }) => (
         </defs>
     </svg>
 );
+
+const CreditIcon = ({ size = 14, color = "currentColor" }) => (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+        <path d="M10 2C14.4183 2 18 5.58172 18 10C18 11.1987 17.8724 11.6314 17.4368 12.4614C17.3082 12.7064 17.0171 12.8163 16.7565 12.7233C16.4433 12.6114 16.2996 12.2548 16.4159 11.9432C16.6424 11.3369 16.725 10.7922 16.725 10C16.725 6.28599 13.714 3.275 10 3.275C6.28599 3.275 3.275 6.28599 3.275 10C3.275 13.714 6.28599 16.725 10 16.725C10.8541 16.725 11.4107 16.691 12.0734 16.4434C12.3338 16.3461 12.6313 16.3929 12.8279 16.5895C13.1382 16.8998 13.0634 17.425 12.6545 17.5845C11.8392 17.9027 11.0522 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2ZM14.9098 12.8571C15.0225 12.5845 15.3998 12.5845 15.5125 12.8571L15.6741 13.2482C15.9506 13.9152 16.4668 14.4477 17.1152 14.7357L17.5741 14.9402C17.8371 15.0567 17.837 15.4388 17.5741 15.5554L17.0875 15.7714C16.4579 16.0524 15.9513 16.5657 15.6696 17.2107L15.5107 17.5723C15.3955 17.8373 15.0292 17.8373 14.9134 17.5723L14.7554 17.2107C14.4737 16.5656 13.9672 16.0524 13.3348 15.7714L12.8482 15.5554C12.5854 15.4388 12.5854 15.0568 12.8482 14.9402L13.3071 14.7357C13.9555 14.4477 14.4717 13.9152 14.7482 13.2482L14.9098 12.8571ZM9.85148 5.14286C10.0501 5.14286 10.249 5.25323 10.3409 5.47473L10.8361 6.66745C11.2631 7.69686 12.0594 8.51836 13.0599 8.96276L14.3621 9.54058C14.7893 9.73037 14.7889 10.3517 14.3621 10.5413L13.0186 11.1385C12.0429 11.5714 11.2609 12.3638 10.826 13.3588L10.3375 14.4774C10.2433 14.6924 10.0471 14.8 9.85148 14.8C9.65588 14.7999 9.46072 14.6923 9.36715 14.4774L8.8786 13.3588C8.44381 12.3631 7.66098 11.5714 6.68521 11.1385L5.34172 10.5413C4.91419 10.3516 4.91419 9.7302 5.34172 9.54058L6.6431 8.96276C7.64414 8.51837 8.44008 7.69624 8.86765 6.66745L9.36293 5.47473C9.45476 5.25341 9.65297 5.14292 9.85148 5.14286ZM9.85148 7.423C9.28989 8.58607 8.3558 9.50709 7.18976 10.0409C8.34371 10.5572 9.27842 11.4558 9.85148 12.5923C10.4245 11.4558 11.3593 10.5564 12.5132 10.0401C11.3473 9.50683 10.413 8.58598 9.85148 7.423Z" fill={color} />
+    </svg>
+);
+
+const SmoothBar = ({ pct = 0, color = "#1a73e8", trackColor = "#e5e7eb", height = 6 }) => {
+    const clamped = Math.min(100, Math.max(0, pct));
+    return (
+        <div style={{ height, background: trackColor, borderRadius: 999, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${clamped}%`, background: color, borderRadius: 999, transition: "width 0.5s ease, background 0.3s" }} />
+        </div>
+    );
+};
+
+const CircularProgress = ({ pct = 0, size = 20, strokeWidth = 3, color = "#7c3aed", trackColor = "#e5e7eb" }) => {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const clamped = Math.min(100, Math.max(0, pct));
+    const offset = circumference - (clamped / 100) * circumference;
+    return (
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)", flexShrink: 0 }}>
+            <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={trackColor} strokeWidth={strokeWidth} />
+            <circle
+                cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth}
+                strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
+                style={{ transition: "stroke-dashoffset 0.5s ease, stroke 0.3s" }}
+            />
+        </svg>
+    );
+};
 
 const CollapseIcon = ({ flipped }) => (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ transform: flipped ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>
@@ -394,16 +427,27 @@ function getAiResponse(text) {
 
 /* ── Chat sidebar ─────────────────────────────────────────── */
 
-function ChatSidebar({ collapsed, sessions, onNew, onSelect, userCredits, totalCredits, reservedCredits = 0, chatCreditsUsed = 0, lockedSessionIds = new Set(), packageName = "Kullanım" }) {
+function ChatSidebar({ collapsed, sessions, onNew, onSelect, userCredits, totalCredits, chatCreditsUsed = 0, lockedSessionIds = new Set(), packageName = "Kullanım", onBuyCredits, extraPackages = [] }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [hoveredSessionId, setHoveredSessionId] = useState(null);
+    const [limitsOpen, setLimitsOpen] = useState(false);
+    const limitsWidgetRef = useRef(null);
+    const navigate = useNavigate();
     const usedCredits = totalCredits - userCredits;
     const usagePct = totalCredits > 0 ? Math.min(100, (usedCredits / totalCredits) * 100) : 0;
-    const barColor = usagePct >= 100 ? "#ef4444" : "#1a73e8";
     const allCreditsExhausted = userCredits <= 0 && chatCreditsUsed >= CREDITS_PER_CHAT;
-    // Reserved segment: shows how much of the bar is reserved for current chat
-    const reservedPct = totalCredits > 0 ? Math.min(100, (reservedCredits / totalCredits) * 100) : 0;
-    const reservedUsedPct = totalCredits > 0 ? Math.min(reservedPct, (chatCreditsUsed / totalCredits) * 100) : 0;
+    const overallExhausted = userCredits <= 0;
+
+    useEffect(() => {
+        if (!limitsOpen) return;
+        const handleClickOutside = (e) => {
+            if (limitsWidgetRef.current && !limitsWidgetRef.current.contains(e.target)) {
+                setLimitsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [limitsOpen]);
 
     const filtered = sessions.filter(s =>
         !searchQuery || s.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -523,42 +567,93 @@ function ChatSidebar({ collapsed, sessions, onNew, onSelect, userCredits, totalC
                             </button>
                         ))}
 
-                        {/* Usage bar with reserved segment */}
-                        <div style={{ padding: "6px 8px 0" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+                        {/* Package widget — logo, name, and a toggle to reveal usage limits */}
+                        <div style={{ padding: "6px 8px 0", position: "relative" }} ref={limitsWidgetRef}>
+                            <button
+                                onClick={() => setLimitsOpen(o => !o)}
+                                style={{
+                                    width: "100%", display: "flex", alignItems: "center", gap: 8,
+                                    background: "none", border: "none", padding: "4px 2px", margin: 0,
+                                    cursor: "pointer", borderRadius: 6, transition: "background 0.13s",
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.04)"}
+                                onMouseLeave={e => e.currentTarget.style.background = "none"}
+                            >
                                 <PremiumPackIcon size={16} />
-                                <span style={{ fontSize: 13, color: "#374151", fontFamily: ds.fonts.family, flex: 1 }}>{packageName}</span>
-                                <span style={{ fontSize: 11, color: "#6b7280", fontFamily: ds.fonts.family }}>{usedCredits}/{totalCredits}</span>
-                            </div>
-                            <div style={{ height: 5, background: "#e0e0e0", borderRadius: 3, overflow: "hidden", position: "relative" }}>
-                                {allCreditsExhausted ? (
-                                    <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", background: "#ef4444", borderRadius: 3, transition: "background 0.3s" }} />
-                                ) : (
-                                    <>
-                                        {/* Used credits (solid) */}
-                                        <div style={{ position: "absolute", left: 0, top: 0, width: `${Math.max(0, usagePct - reservedPct)}%`, height: "100%", background: barColor, borderRadius: 3, transition: "width 0.5s ease, background 0.3s" }} />
-                                        {/* Reserved segment */}
-                                        {reservedPct > 0 && (
-                                            <div style={{ position: "absolute", left: `${Math.max(0, usagePct - reservedPct)}%`, top: 0, width: `${reservedPct}%`, height: "100%", background: "rgba(26,115,232,0.38)", borderRadius: 3, transition: "width 0.5s ease, left 0.5s ease", overflow: "hidden" }}>
-                                                <div style={{ width: `${reservedPct > 0 ? (reservedUsedPct / reservedPct) * 100 : 0}%`, height: "100%", background: "#1a73e8", borderRadius: 3, transition: "width 0.5s ease" }} />
-                                                <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg, transparent, transparent 2px, rgba(255,255,255,0.45) 2px, rgba(255,255,255,0.45) 4px)", borderRadius: 3, pointerEvents: "none" }} />
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                    <span style={{ width: 6, height: 6, borderRadius: 2, background: "#1a73e8", display: "inline-block" }} />
-                                    <span style={{ fontSize: 10, color: "#9ca3af", fontFamily: ds.fonts.family }}>Kullanılan</span>
-                                </div>
-                                <Tooltip title="Her sohbet başlatıldığında toplam kredinizden belirli bir miktar bu sohbet için ayrılır." placement="top">
-                                    <div style={{ display: "flex", alignItems: "center", gap: 4, cursor: "default" }}>
-                                        <span style={{ width: 6, height: 6, borderRadius: 2, background: "rgba(26,115,232,0.45)", display: "inline-block" }} />
-                                        <span style={{ fontSize: 10, color: "#9ca3af", fontFamily: ds.fonts.family }}>Sohbet için rezerve edilen{reservedPct > 0 ? ` (${reservedCredits - chatCreditsUsed} kalan)` : ""}</span>
+                                <span style={{ fontSize: 13, color: "#374151", fontFamily: ds.fonts.family, flex: 1, textAlign: "left" }}>{packageName}</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: limitsOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s", flexShrink: 0 }}>
+                                    <polyline points="18 15 12 9 6 15" />
+                                </svg>
+                            </button>
+
+                            {limitsOpen && (
+                                <div style={{
+                                    position: "absolute", bottom: "calc(100% + 8px)", left: 0, right: 0,
+                                    background: "#fff", border: "1px solid #e5e7eb", borderRadius: 8,
+                                    boxShadow: "0px 8px 24px 0px rgba(0,0,0,0.12), 0px 2px 6px 0px rgba(0,0,0,0.06)",
+                                    padding: "12px 14px 14px", zIndex: 30,
+                                    animation: "bannerSlideUp 0.2s cubic-bezier(0.22,1,0.36,1) both",
+                                }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+                                        <CreditIcon size={14} color="#111827" />
+                                        <span style={{ fontSize: 13, fontWeight: 500, color: "#111827", fontFamily: ds.fonts.family, flex: 1 }}>
+                                            Kullanım Limitleri
+                                        </span>
+                                        <Tooltip title="Kullanım detaylarına git" placement="top" styles={{ body: { fontSize: 11 } }}>
+                                            <button
+                                                onClick={() => { setLimitsOpen(false); navigate("/settings"); }}
+                                                aria-label="Kullanım detaylarına git"
+                                                style={{
+                                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                                    width: 20, height: 20, padding: 0, marginLeft: "auto",
+                                                    background: "none", border: "none", borderRadius: 4, cursor: "pointer", color: "#6b7280",
+                                                    transition: "background 0.15s, color 0.15s",
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.06)"; e.currentTarget.style.color = "#1a73e8"; }}
+                                                onMouseLeave={e => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "#6b7280"; }}
+                                            >
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                                    <polyline points="12 5 19 12 12 19" />
+                                                </svg>
+                                            </button>
+                                        </Tooltip>
                                     </div>
-                                </Tooltip>
-                            </div>
+
+                                    {/* Overall package credit */}
+                                    <div>
+                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+                                            <span style={{ fontSize: 11, color: "#6b7280", fontFamily: ds.fonts.family, fontWeight: 500 }}>{packageName}</span>
+                                            {overallExhausted ? (
+                                                <button
+                                                    onClick={onBuyCredits}
+                                                    style={{ fontSize: 10, color: "#1a73e8", fontWeight: 600, background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: ds.fonts.family, textDecoration: "underline" }}
+                                                >
+                                                    Kredi Al
+                                                </button>
+                                            ) : (
+                                                <span style={{ fontSize: 10, color: "#9ca3af", fontFamily: ds.fonts.family, fontWeight: 500 }}>{usedCredits}/{totalCredits}</span>
+                                            )}
+                                        </div>
+                                        <SmoothBar pct={overallExhausted ? 100 : usagePct} color={overallExhausted ? "#ef4444" : "#1a73e8"} height={6} />
+                                    </div>
+
+                                    {/* Extra purchased package(s) */}
+                                    {extraPackages.length > 0 && (
+                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, paddingTop: 10, borderTop: "1px solid #f0f0f0" }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                                <PremiumPackIcon size={13} />
+                                                <span style={{ fontSize: 11, color: "#6b7280", fontFamily: ds.fonts.family, fontWeight: 500 }}>
+                                                    Ek Paket{extraPackages.length > 1 ? ` (${extraPackages.length})` : ""}
+                                                </span>
+                                            </div>
+                                            <span style={{ fontSize: 10, color: "#059669", fontFamily: ds.fonts.family, fontWeight: 600 }}>
+                                                +{extraPackages.reduce((sum, pkg) => sum + pkg.credits, 0)} Kredi
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </>
@@ -838,6 +933,7 @@ function ChatLockedCard({ onNewChat, canStart, onBuyCredits }) {
                         Yeni Sohbet Aç
                     </button>
                 )}
+                {canStart && (
                 <button
                     onClick={onBuyCredits}
                     style={{
@@ -854,6 +950,7 @@ function ChatLockedCard({ onNewChat, canStart, onBuyCredits }) {
                     </svg>
                     Kredi Al
                 </button>
+                )}
             </div>
         </div>
     );
@@ -868,7 +965,7 @@ const CREDIT_PACKAGES = [
     { id: "c100", credits: 100, pricePerCredit: "€0.60", total: "€59.90" },
 ];
 
-function TokenExhaustedChatCard({ onBuyCredits }) {
+function TokenExhaustedChatCard({ onPurchase }) {
     return (
         <div style={{ margin: "9px 0 18px", fontFamily: ds.fonts.family }}>
             {/* Başlık */}
@@ -925,7 +1022,7 @@ function TokenExhaustedChatCard({ onBuyCredits }) {
                                 {pkg.total}
                             </span>
                             <button
-                                onClick={onBuyCredits}
+                                onClick={() => onPurchase(pkg)}
                                 style={{
                                     flex: 1,
                                     minWidth: 0,
@@ -958,7 +1055,7 @@ function TokenExhaustedChatCard({ onBuyCredits }) {
 }
 
 
-function NoCreditBanner({ onBuyCredits }) {
+function NoCreditBanner({ onViewPackages }) {
     return (
         <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -980,7 +1077,7 @@ function NoCreditBanner({ onBuyCredits }) {
                 </div>
             </div>
             <button
-                onClick={onBuyCredits}
+                onClick={onViewPackages}
                 style={{
                     background: "#ff4d4f",
                     color: "white", border: "none",
@@ -991,7 +1088,7 @@ function NoCreditBanner({ onBuyCredits }) {
                 onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
             >
-                Kredi Satın Al
+                Paketlere Göz At
             </button>
         </div>
     );
@@ -1018,17 +1115,21 @@ export default function TariffAiPage() {
     const [chatCreditsUsed, setChatCreditsUsed] = useState(0);
     const [lockedSessionIds, setLockedSessionIds] = useState(new Set());
     const [limitWarningDismissed, setLimitWarningDismissed] = useState(false);
+    const [purchasedPackages, setPurchasedPackages] = useState([]);
     const chatEndRef = useRef(null);
     const inputRef = useRef(null);
     const fileInputRef = useRef(null);
     const imageInputRef = useRef(null);
+    const packagesCardRef = useRef(null);
 
     const chatCreditsRemaining = Math.max(0, CREDITS_PER_CHAT - chatCreditsUsed);
     const isChatLocked = chatCreditsUsed >= CREDITS_PER_CHAT;
     // Warn when ≤10% of reserved credits remain
     const isChatNearLimit = !isChatLocked && !limitWarningDismissed && chatCreditsRemaining / CREDITS_PER_CHAT <= 0.10;
-    // All credits exhausted: global credits gone AND reserved credits fully used
+    // All credits exhausted: global credits gone AND this chat's own reserved credits fully used
     const isOutOfCredits = userCredits <= 0 && isChatLocked;
+    const extraCredits = purchasedPackages.reduce((sum, pkg) => sum + pkg.credits, 0);
+    const effectiveTotalCredits = TOTAL_CREDITS + extraCredits;
 
     // Navigate to Settings to buy credits
     const handleBuyCredits = () => {
@@ -1037,6 +1138,15 @@ export default function TariffAiPage() {
         window.dispatchEvent(event);
         // Demo fallback alert
         alert("Kredi satın almak için Ayarlar > Kredi Bakiyesi bölümüne gidin.");
+    };
+
+    const handlePurchasePackage = (pkg) => {
+        setUserCredits(prev => prev + pkg.credits);
+        setPurchasedPackages(prev => [...prev, pkg]);
+    };
+
+    const handleViewPackages = () => {
+        packagesCardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
 
     const handleAttachPdf = () => {
@@ -1209,7 +1319,7 @@ export default function TariffAiPage() {
         `}</style>
 
                 {/* Sidebar */}
-                <ChatSidebar collapsed={sidebarCollapsed} onCollapse={() => setSidebarCollapsed(c => !c)} sessions={sessions} activeId={activeSessionId} onNew={handleNewChat} onSelect={(id) => { setActiveSessionId(id); setScreen(SCREENS.CHAT); }} userCredits={userCredits} totalCredits={TOTAL_CREDITS} reservedCredits={0} chatCreditsUsed={0} lockedSessionIds={lockedSessionIds} packageName={PACKAGE_NAME} />
+                <ChatSidebar collapsed={sidebarCollapsed} onCollapse={() => setSidebarCollapsed(c => !c)} sessions={sessions} activeId={activeSessionId} onNew={handleNewChat} onSelect={(id) => { setActiveSessionId(id); setScreen(SCREENS.CHAT); }} userCredits={userCredits} totalCredits={effectiveTotalCredits} chatCreditsUsed={0} lockedSessionIds={lockedSessionIds} packageName={PACKAGE_NAME} onBuyCredits={handleBuyCredits} extraPackages={purchasedPackages} />
 
                 {/* Main content */}
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
@@ -1294,7 +1404,7 @@ export default function TariffAiPage() {
       `}</style>
 
             {/* Left sidebar */}
-            <ChatSidebar collapsed={sidebarCollapsed} onCollapse={() => setSidebarCollapsed(c => !c)} sessions={sessions} activeId={activeSessionId} onNew={handleNewChat} onSelect={(id) => { setActiveSessionId(id); setMessages([]); setChatCreditsUsed(lockedSessionIds.has(id) ? CREDITS_PER_CHAT : 0); setLimitWarningDismissed(false); }} userCredits={userCredits} totalCredits={TOTAL_CREDITS} reservedCredits={activeSessionId != null && !lockedSessionIds.has(activeSessionId) ? CREDITS_PER_CHAT : 0} chatCreditsUsed={chatCreditsUsed} lockedSessionIds={lockedSessionIds} packageName={PACKAGE_NAME} />
+            <ChatSidebar collapsed={sidebarCollapsed} onCollapse={() => setSidebarCollapsed(c => !c)} sessions={sessions} activeId={activeSessionId} onNew={handleNewChat} onSelect={(id) => { setActiveSessionId(id); setMessages([]); setChatCreditsUsed(lockedSessionIds.has(id) ? CREDITS_PER_CHAT : 0); setLimitWarningDismissed(false); }} userCredits={userCredits} totalCredits={effectiveTotalCredits} chatCreditsUsed={chatCreditsUsed} lockedSessionIds={lockedSessionIds} packageName={PACKAGE_NAME} onBuyCredits={handleBuyCredits} extraPackages={purchasedPackages} />
 
             {/* Chat area wrapper */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
@@ -1423,7 +1533,9 @@ export default function TariffAiPage() {
 
                         {/* ── Token Exhausted In-Chat Card ── */}
                         {isOutOfCredits && (
-                            <TokenExhaustedChatCard onBuyCredits={handleBuyCredits} />
+                            <div ref={packagesCardRef}>
+                                <TokenExhaustedChatCard onPurchase={handlePurchasePackage} />
+                            </div>
                         )}
 
                         <div ref={chatEndRef} />
@@ -1434,7 +1546,7 @@ export default function TariffAiPage() {
                 {(isChatNearLimit || isOutOfCredits) && (
                     <div style={{ flexShrink: 0, padding: "0 24px 0", marginBottom: -3, zIndex: 10, position: "relative" }}>
                         <div style={{ maxWidth: 780, margin: "0 auto", width: "85%" }}>
-                            {isOutOfCredits && <div style={{ width: "95%", margin: "0 auto" }}><NoCreditBanner onBuyCredits={handleBuyCredits} /></div>}
+                            {isOutOfCredits && <div style={{ width: "95%", margin: "0 auto" }}><NoCreditBanner onViewPackages={handleViewPackages} /></div>}
                             {!isOutOfCredits && isChatNearLimit && <div style={{ width: "95%", margin: "0 auto" }}><ChatLimitWarningBanner remaining={chatCreditsRemaining} onNewChat={handleNewChat} onClose={() => setLimitWarningDismissed(true)} /></div>}
                         </div>
                     </div>
@@ -1667,10 +1779,17 @@ export default function TariffAiPage() {
                                 </div>
                             </div>
 
-                            {/* Disclaimer */}
-                            <p style={{ margin: "10px 0 0", fontSize: "12px", color: ds.colors.textMuted, lineHeight: 1.5, textAlign: "center", paddingBottom: "4px" }}>
-                                AI yanıtları hatalı bilgiler içerebilir. Önemli bilgileri her zaman doğrulayın.
-                            </p>
+                            {/* Disclaimer + current-chat credit meter */}
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, margin: "10px 0 0", paddingBottom: "4px" }}>
+                                <p style={{ margin: 0, fontSize: "12px", color: ds.colors.textMuted, lineHeight: 1.5, flexShrink: 1 }}>
+                                    AI yanıtları hatalı bilgiler içerebilir. Önemli bilgileri her zaman doğrulayın.
+                                </p>
+                                <Tooltip title={`Bu sohbette ${chatCreditsUsed}/${CREDITS_PER_CHAT} kredi kullanıldı.`} placement="top" styles={{ body: { fontSize: 11 } }}>
+                                    <div style={{ display: "flex", alignItems: "center", flexShrink: 0, cursor: "default" }}>
+                                        <CircularProgress pct={(chatCreditsUsed / CREDITS_PER_CHAT) * 100} size={20} strokeWidth={3} color={chatCreditsUsed >= CREDITS_PER_CHAT ? "#ef4444" : "#7c3aed"} />
+                                    </div>
+                                </Tooltip>
+                            </div>
                         </div>}
                     </div>
                 </div>
