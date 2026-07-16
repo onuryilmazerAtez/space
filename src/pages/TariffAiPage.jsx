@@ -641,12 +641,9 @@ function ChatSidebar({ collapsed, sessions, onNew, onSelect, userCredits, totalC
                                     {/* Extra purchased package(s) */}
                                     {extraPackages.length > 0 && (
                                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, paddingTop: 10, borderTop: "1px solid #f0f0f0" }}>
-                                            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                                                <PremiumPackIcon size={13} />
-                                                <span style={{ fontSize: 11, color: "#6b7280", fontFamily: ds.fonts.family, fontWeight: 500 }}>
-                                                    Ek Paket{extraPackages.length > 1 ? ` (${extraPackages.length})` : ""}
-                                                </span>
-                                            </div>
+                                            <span style={{ fontSize: 11, color: "#6b7280", fontFamily: ds.fonts.family, fontWeight: 500 }}>
+                                                Ek Paket{extraPackages.length > 1 ? ` (${extraPackages.length})` : ""}
+                                            </span>
                                             <span style={{ fontSize: 10, color: "#059669", fontFamily: ds.fonts.family, fontWeight: 600 }}>
                                                 +{extraPackages.reduce((sum, pkg) => sum + pkg.credits, 0)} Kredi
                                             </span>
